@@ -18,22 +18,12 @@ Bat:
   Summer: true
   Fall: true
   Winter: true
-Bjorn:
-  Spring: true
-  Summer: true
-  Fall: true
-  Winter: true
 Blob:
   Spring: true
   Summer: true
   Fall: true
   Winter: true
 BlobElite:
-  Spring: true
-  Summer: true
-  Fall: true
-  Winter: true
-BlobFrost:
   Spring: true
   Summer: true
   Fall: true
@@ -368,11 +358,6 @@ Neck:
   Summer: true
   Fall: true
   Winter: true
-piece_TrainingDummy:
-  Spring: true
-  Summer: true
-  Fall: true
-  Winter: true
 Seeker:
   Spring: true
   Summer: true
@@ -478,22 +463,17 @@ Ulv:
   Summer: true
   Fall: true
   Winter: true
-Unbjorn:
-  Spring: true
-  Summer: true
-  Fall: true
-  Winter: true
-Volture:
-  Spring: true
-  Summer: true
-  Fall: true
-  Winter: true
 Wolf:
   Spring: true
   Summer: true
   Fall: true
   Winter: true
 Wolf_cub:
+  Spring: true
+  Summer: true
+  Fall: true
+  Winter: true
+Volture:
   Spring: true
   Summer: true
   Fall: true
