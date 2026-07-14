@@ -41,9 +41,9 @@ services:
       - "2457:2457/udp"
       - "2458:2458/udp"
     volumes:
-      - ./tmp/saves:/home/steam/.config/unity3d/IronGate/Valheim
-      - ./tmp/server:/home/steam/valheim
-      - ./tmp/backups:/home/steam/backups
+      - ./main/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ./main/server:/home/steam/valheim
+      - ./main/backups:/home/steam/backups
     restart: unless-stopped
 
   hellheim:
@@ -88,8 +88,8 @@ services:
       - "3457:2457/udp"
       - "3458:2458/udp"
     volumes:
-      - ./hel/saves:/home/steam/.config/unity3d/IronGate/Valheim
-      - ./hel/server:/home/steam/valheim
-      - ./hel/backups:/home/steam/backups
+      - ./hell/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ./hell/server:/home/steam/valheim
+      - ./hell/backups:/home/steam/backups
     restart: unless-stopped
 
