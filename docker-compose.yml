@@ -28,7 +28,6 @@ services:
         BetterUI_ForeverMaintained-BetterUI_ForeverMaintained-2.5.9
         Grizzzly-CraftFromContainers-3.8.1
         RandyKnapp-ImprovedBuildHud-1.0.8
-        bdew-QuickConnect-1.7.0
         RustyMods-Seasonality-3.8.0
         TastyChickenLegs-TimedTorchesStayLit-1.3.9
         ValheimModding-YamlDotNet-16.3.1
@@ -76,7 +75,6 @@ services:
         BetterUI_ForeverMaintained-BetterUI_ForeverMaintained-2.5.9
         Grizzzly-CraftFromContainers-3.8.1
         RandyKnapp-ImprovedBuildHud-1.0.8
-        bdew-QuickConnect-1.7.0
         RustyMods-Seasonality-3.8.0
         TastyChickenLegs-TimedTorchesStayLit-1.3.9
         ValheimModding-YamlDotNet-16.3.1
