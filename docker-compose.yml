@@ -1,6 +1,8 @@
 services:
   valheim:
     image: mbround18/valheim:3
+    env_file:
+      - env
     environment:
       PORT: 2456
       PUBLIC: 0
@@ -8,7 +10,6 @@ services:
       PASSWORD: "trees"
       TZ: "America/Denver"
       WORLD: "RockandStone"
-      WEBHOOK_URL: https://discord.com/api/webhooks/1523155435027304579/iI2YMHUsX7N7j-Z5KbU1i0xxTNgQHlX1yGE14zH8QlpqzTiaz-6FPkRGv2hIP8ujiHlm
       AUTO_UPDATE: 1
       UPDATE_ON_START: 0
       AUTO_UPDATE_SCHEDULE: "0 1 * * *"
@@ -48,6 +49,8 @@ services:
 
   hellheim:
     image: mbround18/valheim:3
+    env_file:
+      - env
     environment:
       PORT: 2456
       PUBLIC: 0
@@ -55,7 +58,6 @@ services:
       PASSWORD: "trees"
       TZ: "America/Denver"
       WORLD: "Hellheim"
-      WEBHOOK_URL: https://discord.com/api/webhooks/1523155435027304579/iI2YMHUsX7N7j-Z5KbU1i0xxTNgQHlX1yGE14zH8QlpqzTiaz-6FPkRGv2hIP8ujiHlm
       AUTO_UPDATE: 1
       UPDATE_ON_START: 0
       AUTO_UPDATE_SCHEDULE: "0 1 * * *"
