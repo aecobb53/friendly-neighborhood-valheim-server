@@ -10,7 +10,6 @@ services:
       TZ: "America/Denver"
       WORLD: "RockandStone"
       PRESET: Normal
-
       AUTO_UPDATE: 1
       UPDATE_ON_START: 0
       AUTO_UPDATE_SCHEDULE: "0 1 * * *"
