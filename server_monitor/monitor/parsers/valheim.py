@@ -1,4 +1,6 @@
 import re
+import datetime
+
 from .common import BaseParser, ServerStatus
 
 
@@ -33,12 +35,20 @@ class ValheimParser(BaseParser):
     # def __init__(self):
     #     self.statuses = []
 
-    @property
-    def status(self):
-        return self.statuses[-1] if self.statuses else None
+    # @property
+    # def status(self):
+    #     return self.statuses[-1] if self.statuses else None
 
     def parse(self, line: str):
         for pattern, status_content in self.status_pattern.items():
             if re.search(pattern, line):
-                return status_content['status'], status_content
+                print(f"LINE: {line}")
+                content = status_content.copy()
+                content['line'] = line.strip()
+                timestamp = re.search(r"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\s+(.*)", line.strip())
+                if timestamp:
+                    content['timestamp'] = timestamp.group(1)
+                else:
+                    content['timestamp'] = datetime.datetime.now().isoformat()
+                return content['status'], content
         return None, None

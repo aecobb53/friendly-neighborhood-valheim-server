@@ -2,4 +2,5 @@ services:
   monitor:
     build: ./monitor
     volumes:
+      - ./monitor/storage:/app/storage
       - /var/run/docker.sock:/var/run/docker.sock:ro

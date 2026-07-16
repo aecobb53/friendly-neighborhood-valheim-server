@@ -1,11 +1,11 @@
+import os
 import docker
 import threading
-from dataclasses import dataclass, field
 import json
+from dataclasses import dataclass, field
 from enum import Enum
-from parsers.common import BaseParser
+from parsers.common import BaseParser, ServerStatus
 from parsers.valheim import ValheimParser
-import re
 
 
 
@@ -29,7 +29,9 @@ class TrackedContainer:
 
     @property
     def server_status(self):
-        return self.server_status_list[-1] if self.server_status_list else None
+        if self.server_status_list:
+            return self.server_status_list[-1]['status']
+        return ServerStatus.UNKNOWN
 
     def start(self):
         if self.thread is None or not self.thread.is_alive():
@@ -47,14 +49,44 @@ class TrackedContainer:
         raise NotImplementedError("Stopping threads is not implemented. You would need to implement a stopping mechanism.")
 
     def _watch_logs(self):
+        save_change = False
         try:
             for line in self.container.logs(stream=True, follow=True):
                 server_status, status_content = self.parser.parse(line.decode())
+                if server_status and (server_status.name != self.server_status.name):
+                    save_change = True
                 if server_status:
                     self.server_status_list.append(status_content)
+                if save_change:
+                    self._save_current_state()
+                    save_change = False
         finally:
             self.thread = None
             self.container_status = ContainerStatus.STOPPED
+
+    def _save_current_state(self):
+        server_status_list = []
+        for ssl in self.server_status_list:
+            server_status_list.append({
+                "status": ssl['status'].name,
+                "message": ssl['message'],
+                "line": ssl['line'],
+                "timestamp": ssl['timestamp'],
+            })
+        state = {
+            "container_id": self.container.id,
+            "container_status": self.container_status.value,
+            "server_status_list": server_status_list,
+        }
+        print(f"STATE: {state}")
+        path = os.path.join(
+            '/app',
+            'storage',
+            f"{self.container.id}_state.json"
+        )
+        print(f"Saving state to {path}")
+        with open(path, "w") as f:
+            json.dump(state, f, indent=4)
 
 
 def initialize():
@@ -91,13 +123,6 @@ def watch_containers(client, tracked):
                     container_status=ContainerStatus.RUNNING,
                 )
                 tracked[cid].start()
-
-# def watch_logs(container):
-#     for line in container.logs(stream=True, follow=True):
-#         # parser.parse(line.decode())
-#         # print(container, line)
-#         print(container)
-
 
 client, tracked = initialize()
 watch_containers(client, tracked)
