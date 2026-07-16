@@ -1,5 +1,12 @@
 # Project Specific
 env
+main/backups/
+main/saves/
+main/server/*.sh
+hell/backups/
+hell/saves/
+hell/server/*.sh
+server_monitor/monitor/storage
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

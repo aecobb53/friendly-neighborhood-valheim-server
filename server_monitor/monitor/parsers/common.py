@@ -7,6 +7,7 @@ class ServerStatus(Enum):
     INSTALLING_MODS = 'Installing Server Mods'
     REGISTERING = 'Registering Server Lobby with Master Server'
     RUNNING = 'Server is Running'
+    UNKNOWN = 'Unknown Server Status'
 
 
 class BaseParser:
