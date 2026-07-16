@@ -45,6 +45,9 @@ services:
       - ./main/server:/home/steam/valheim
       - ./main/backups:/home/steam/backups
     restart: unless-stopped
+    labels:
+      server_monitor.enabled: "true"
+      server_monitor.parser: "valheim"
 
   hellheim:
     image: mbround18/valheim:3
@@ -92,4 +95,6 @@ services:
       - ./hell/server:/home/steam/valheim
       - ./hell/backups:/home/steam/backups
     restart: unless-stopped
-
+    labels:
+      server_monitor.enabled: "true"
+      server_monitor.parser: "valheim"
