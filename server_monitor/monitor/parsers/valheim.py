@@ -31,6 +31,7 @@ class ValheimParser(BaseParser):
             "message": "Server is Running and Connected to Master Server"
         },
     }
+    game_name = "Valheim"
 
     # def __init__(self):
     #     self.statuses = []

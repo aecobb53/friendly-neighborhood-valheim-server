@@ -76,6 +76,7 @@ class TrackedContainer:
         state = {
             "container_id": self.container.id,
             "container_status": self.container_status.value,
+            "game_name": self.parser.game_name,
             "server_status_list": server_status_list,
         }
         print(f"STATE: {state}")

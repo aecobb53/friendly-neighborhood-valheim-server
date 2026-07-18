@@ -11,5 +11,6 @@ class ServerStatus(Enum):
 
 
 class BaseParser:
+    game_name = "Unknown Game"
     def parse(self, line: str):
         raise NotImplementedError("Subclasses should implement this method.")
