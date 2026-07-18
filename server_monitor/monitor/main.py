@@ -6,10 +6,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 from parsers.common import BaseParser, ServerStatus
 from parsers.valheim import ValheimParser
+from datetime import datetime, timezone
 
 
 
 LABEL = "server_monitor.enabled=true"
+SHARED_STORAGE = os.path.join(
+    '/app',
+    'storage',
+)
 
 
 class ContainerStatus(Enum):
@@ -79,13 +84,10 @@ class TrackedContainer:
             "game_name": self.parser.game_name,
             "server_status_list": server_status_list,
         }
-        print(f"STATE: {state}")
         path = os.path.join(
-            '/app',
-            'storage',
+            SHARED_STORAGE,
             f"{self.container.id}_state.json"
         )
-        print(f"Saving state to {path}")
         with open(path, "w") as f:
             json.dump(state, f, indent=4)
 
@@ -102,6 +104,22 @@ def initialize():
         )
         tracked[container.id].start()
 
+    for file_path in os.listdir(SHARED_STORAGE):
+        print(f"FILE PATH: {file_path}")
+        if file_path.replace("_state.json", '') not in tracked:
+            # Ensure its been marked Closed
+            with open(os.path.join(SHARED_STORAGE, file_path)) as jf:
+                content = json.load(jf)
+                print(json.dumps(content, indent=4))
+                content['container_status'] = ContainerStatus.STOPPED.value
+                content['server_status_list'].append({
+                    "status": ServerStatus.STOPPED.name,
+                    "message": "Server has been shut down",
+                    "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                })
+                with open(os.path.join(SHARED_STORAGE, file_path), "w") as f:
+                    json.dump(content, f, indent=4)
+
     return client, tracked
 
 def watch_containers(client, tracked):
@@ -116,7 +134,6 @@ def watch_containers(client, tracked):
         action = event["Action"]
 
         if action in ['start', 'create']:
-            # print(f"Container {cid} {action} is starting")
             if cid not in tracked:
                 tracked[cid] = TrackedContainer(
                     container=client.containers.get(cid),
@@ -125,5 +142,6 @@ def watch_containers(client, tracked):
                 )
                 tracked[cid].start()
 
-client, tracked = initialize()
-watch_containers(client, tracked)
+if __name__ == "__main__":
+    client, tracked = initialize()
+    watch_containers(client, tracked)

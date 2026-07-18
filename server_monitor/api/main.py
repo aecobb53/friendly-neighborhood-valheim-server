@@ -50,10 +50,10 @@ def server_status():
     servers = {}
 
     for file in DATA_DIR.glob("*.json"):
-        print(f"FILE: {file}")
         with open(file) as f:
             server_info = json.load(f)
-            print(json.dumps(server_info, indent=2))
+            if server_info['container_status'] not in ['running']:
+                continue
             game_name = 'GAME NAME'
             if game_name not in servers:
                 servers[game_name] = []
@@ -82,38 +82,3 @@ def server_status():
         response['games'].append(game_payload)
     print(json.dumps(response, indent=4))
     return response
-"""
-    
-
-
-
-
-
-
-{
-  "games": [
-    {
-      "name": "Valheim",
-      "image": "valheim",
-      "servers": [
-        {
-          "id": "rock",
-          "name": "Rock",
-          "status": "running",
-          "healthy": true,
-          "last_message": "Connected to master server",
-          "updated": "2026-07-17T15:42:18Z"
-        },
-        {
-          "id": "meadows",
-          "name": "Meadows",
-          "status": "starting",
-          "healthy": false,
-          "last_message": "Installing mods",
-          "updated": "2026-07-17T15:41:02Z"
-        }
-      ]
-    }
-  ]
-}
-"""
