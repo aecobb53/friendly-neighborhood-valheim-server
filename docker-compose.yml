@@ -48,6 +48,7 @@ services:
     labels:
       server_monitor.enabled: "true"
       server_monitor.parser: "valheim"
+      server_monitor.server_name: "RockandStone"
 
   hellheim:
     image: mbround18/valheim:3
@@ -98,3 +99,4 @@ services:
     labels:
       server_monitor.enabled: "true"
       server_monitor.parser: "valheim"
+      server_monitor.server_name: "Hellheim"

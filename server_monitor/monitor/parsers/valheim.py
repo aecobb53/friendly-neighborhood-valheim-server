@@ -43,7 +43,6 @@ class ValheimParser(BaseParser):
     def parse(self, line: str):
         for pattern, status_content in self.status_pattern.items():
             if re.search(pattern, line):
-                print(f"LINE: {line}")
                 content = status_content.copy()
                 content['line'] = line.strip()
                 timestamp = re.search(r"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\s+(.*)", line.strip())
