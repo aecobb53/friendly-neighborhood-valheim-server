@@ -8,6 +8,7 @@ class ServerStatus(Enum):
     REGISTERING = 'Registering Server Lobby with Master Server'
     RUNNING = 'Server is Running'
     UNKNOWN = 'Unknown Server Status'
+    STOPPED = 'Server is no longer used'
 
 
 class BaseParser:
