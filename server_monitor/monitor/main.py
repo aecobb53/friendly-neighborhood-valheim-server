@@ -31,6 +31,7 @@ class TrackedContainer:
 
     container_status: ContainerStatus
     server_status_list: list = field(init=False, default_factory=list)
+    server_name: str = "Unknown Server Name"
 
     @property
     def server_status(self):
@@ -82,6 +83,7 @@ class TrackedContainer:
             "container_id": self.container.id,
             "container_status": self.container_status.value,
             "game_name": self.parser.game_name,
+            "server_name": self.server_name,
             "server_status_list": server_status_list,
         }
         path = os.path.join(
@@ -97,20 +99,21 @@ def initialize():
     tracked = {}
 
     for container in client.containers.list(filters={"label": LABEL}):
+        labels = container.labels
+        server_name = labels.get("server_monitor.server_name", "Unknown Server Name")
         tracked[container.id] = TrackedContainer(
             container=container,
             parser=ValheimParser(),
             container_status=ContainerStatus.RUNNING,
+            server_name=server_name
         )
         tracked[container.id].start()
 
     for file_path in os.listdir(SHARED_STORAGE):
-        print(f"FILE PATH: {file_path}")
         if file_path.replace("_state.json", '') not in tracked:
             # Ensure its been marked Closed
             with open(os.path.join(SHARED_STORAGE, file_path)) as jf:
                 content = json.load(jf)
-                print(json.dumps(content, indent=4))
                 content['container_status'] = ContainerStatus.STOPPED.value
                 content['server_status_list'].append({
                     "status": ServerStatus.STOPPED.name,

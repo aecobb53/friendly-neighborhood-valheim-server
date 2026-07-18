@@ -13,22 +13,6 @@ app = FastAPI()
 DATA_DIR = Path("/app/storage")
 
 
-# @app.get('/')
-# def root():
-#     return {"message": "Server Monitor API is running."}
-
-# @app.get("/servers")
-# def get_servers():
-#     servers = []
-
-#     for file in DATA_DIR.glob("*.json"):
-#         with open(file) as f:
-#             servers.append(json.load(f))
-
-#     print(json.dumps(servers, indent=4))
-
-#     return servers
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -54,7 +38,7 @@ def server_status():
             server_info = json.load(f)
             if server_info['container_status'] not in ['running']:
                 continue
-            game_name = 'GAME NAME'
+            game_name = server_info['game_name']
             if game_name not in servers:
                 servers[game_name] = []
             servers[game_name].append(server_info)
@@ -69,10 +53,9 @@ def server_status():
             if not len(server['server_status_list']):
                 continue
             current_status = server['server_status_list'][-1]
-            print(f"GAME SERVER: {game_servers}")
             game_payload['servers'].append({
                 "id": server['container_id'],
-                "name": "EXAMPLE SERVER NAME",
+                "name": server['server_name'],
                 "container_status": server['container_status'],
                 "server_status": current_status['status'],
                 "healthy": True,
@@ -80,5 +63,4 @@ def server_status():
                 "updated": current_status['timestamp'],
             })
         response['games'].append(game_payload)
-    print(json.dumps(response, indent=4))
     return response
