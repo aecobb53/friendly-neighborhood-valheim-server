@@ -7,12 +7,12 @@ services:
       PORT: 2456
       PUBLIC: 0
       NAME: "RockandStone"
-      TZ: "America/Denver"
+      TZ: "UTC"
       WORLD: "RockandStone"
       PRESET: Normal
       AUTO_UPDATE: 1
       UPDATE_ON_START: 0
-      AUTO_UPDATE_SCHEDULE: "0 1 * * *"
+      AUTO_UPDATE_SCHEDULE: "0 11 * * *"
       AUTO_UPDATE_PAUSE_WITH_PLAYER: 1
       AUTO_BACKUP: 1
       AUTO_BACKUP_ON_UPDATE: 1
@@ -58,12 +58,12 @@ services:
       PORT: 2456
       PUBLIC: 0
       NAME: "Hellheim"
-      TZ: "America/Denver"
+      TZ: "UTC"
       WORLD: "Hellheim"
       MODIFIERS: combat=varyhard,deathpenalty=casual,resourcerate=x3,raidrate=muchmore,portals=normal
       AUTO_UPDATE: 1
       UPDATE_ON_START: 0
-      AUTO_UPDATE_SCHEDULE: "0 1 * * *"
+      AUTO_UPDATE_SCHEDULE: "0 11 * * *"
       AUTO_UPDATE_PAUSE_WITH_PLAYER: 1
       AUTO_BACKUP: 1
       AUTO_BACKUP_ON_UPDATE: 1
