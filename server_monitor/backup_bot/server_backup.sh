@@ -26,22 +26,24 @@ done
 timestamp="$(date -u +"%Y-%m-%dT%H")"
 run_id="${timestamp}"
 backup_tmp="${BACKUP_ROOT}/.tmp-${run_id}"
-backup_final="${BACKUP_ROOT}/${run_id}"
+backup_final="${BACKUP_ROOT}/game_servers_backup_${run_id}"
 log_file="${LOG_DIR}/server_backup_${run_id}.log"
-manifest_file="${backup_tmp}/manifest.json"
+manifest_file="${backup_tmp}/manifest.yaml"
 manifest_started=0
 
 log() {
     printf '%s %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$1" | tee -a "$log_file"
 }
 
-json_escape() {
-    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+yaml_escape() {
+    printf '%s' "$1" | sed "s/'/''/g"
 }
 
 write_manifest_start() {
     cat > "$manifest_file" <<EOF
-{"timestamp":"$timestamp","run_id":"$run_id","status":"running","files":[
+timestamp: $timestamp
+run_id: $run_id
+files:
 EOF
     manifest_started=1
 }
@@ -50,13 +52,15 @@ append_manifest_entry() {
     local src="$1"
     local status="$2"
     local message="$3"
+    local saved_as
+    saved_as="$(basename "$src")"
     [[ "$manifest_started" -eq 1 ]] || return 1
-    printf '%s{"source":"%s","status":"%s","message":"%s"}' \
-        "${manifest_first:+,}" \
-        "$(json_escape "$src")" \
-        "$(json_escape "$status")" \
-        "$(json_escape "$message")" >> "$manifest_file"
-    manifest_first=1
+    cat >> "$manifest_file" <<EOF
+  - source: $src
+    saved_as: $saved_as
+    status: $status
+    message: $message
+EOF
 }
 
 write_error() {
@@ -91,7 +95,7 @@ if [[ "$SKIP_BACKUP" -eq 0 ]]; then
     done < "$FILES_FILE"
 
     cat >> "$manifest_file" <<'EOF'
-],"status":"completed"}
+status: completed
 EOF
 
     rm -rf "$backup_final"
