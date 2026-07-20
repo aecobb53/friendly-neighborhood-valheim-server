@@ -8,6 +8,7 @@ hell/saves/
 hell/server/*.sh
 server_monitor/monitor/storage
 server_monitor/shared/states
+server_backup.files
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
