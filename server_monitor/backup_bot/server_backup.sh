@@ -23,7 +23,7 @@ for arg in "$@"; do
   esac
 done
 
-timestamp="$(date -u +"%Y-%m-%dT%H")"
+timestamp="$(date -u +"%Y_%m_%d_%H")"
 run_id="${timestamp}"
 backup_tmp="${BACKUP_ROOT}/.tmp-${run_id}"
 backup_final="${BACKUP_ROOT}/game_servers_backup_${run_id}"
