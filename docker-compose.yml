@@ -2,7 +2,7 @@ services:
   valheim:
     image: mbround18/valheim:3
     env_file:
-      - env
+      - .env
     environment:
       PORT: 2456
       PUBLIC: 0
@@ -17,7 +17,7 @@ services:
       AUTO_BACKUP: 1
       AUTO_BACKUP_ON_UPDATE: 1
       AUTO_BACKUP_SCHEDULE: 0 * * * *
-      AUTO_BACKUP_DAYS_TO_LIVE: 7
+      AUTO_BACKUP_DAYS_TO_LIVE: 1
       AUTO_BACKUP_PAUSE_WITH_NO_PLAYERS: 1
       TYPE: BepInEx
       MODS: denikson-BepInExPack_Valheim-5.4.2333
@@ -41,9 +41,9 @@ services:
       - "2457:2457/udp"
       - "2458:2458/udp"
     volumes:
-      - ./main/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ${SAVES_DIR}/main/saves:/home/steam/.config/unity3d/IronGate/Valheim
       - ./main/server:/home/steam/valheim
-      - ./main/backups:/home/steam/backups
+      - ${BACKUP_DIR}/main/backups:/home/steam/backups
     restart: unless-stopped
     labels:
       server_monitor.enabled: "true"
@@ -53,7 +53,7 @@ services:
   hellheim:
     image: mbround18/valheim:3
     env_file:
-      - env
+      - .env
     environment:
       PORT: 2456
       PUBLIC: 0
@@ -68,7 +68,7 @@ services:
       AUTO_BACKUP: 1
       AUTO_BACKUP_ON_UPDATE: 1
       AUTO_BACKUP_SCHEDULE: 0 * * * *
-      AUTO_BACKUP_DAYS_TO_LIVE: 7
+      AUTO_BACKUP_DAYS_TO_LIVE: 1
       AUTO_BACKUP_PAUSE_WITH_NO_PLAYERS: 1
       TYPE: BepInEx
       MODS: denikson-BepInExPack_Valheim-5.4.2333
@@ -92,9 +92,9 @@ services:
       - "3457:2457/udp"
       - "3458:2458/udp"
     volumes:
-      - ./hell/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ${SAVES_DIR}/hell/saves:/home/steam/.config/unity3d/IronGate/Valheim
       - ./hell/server:/home/steam/valheim
-      - ./hell/backups:/home/steam/backups
+      - ${BACKUP_DIR}/hell/backups:/home/steam/backups
     restart: unless-stopped
     labels:
       server_monitor.enabled: "true"
