@@ -3,7 +3,7 @@ set -u
 set -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="${SCRIPT_DIR}/env"
+ENV_FILE="${SCRIPT_DIR}/.env"
 FILES_FILE="${SCRIPT_DIR}/server_backup.files"
 
 # shellcheck disable=SC1090
@@ -32,39 +32,39 @@ manifest_file="${backup_tmp}/manifest.json"
 manifest_started=0
 
 log() {
-  printf '%s %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$1" | tee -a "$log_file"
+    printf '%s %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$1" | tee -a "$log_file"
 }
 
 json_escape() {
-  printf '%s' "$1" | sed 's/\\/\\\\g; s/"/\\"/g'
+    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
 write_manifest_start() {
-  cat > "$manifest_file" <<EOF
+    cat > "$manifest_file" <<EOF
 {"timestamp":"$timestamp","run_id":"$run_id","status":"running","files":[
 EOF
-  manifest_started=1
+    manifest_started=1
 }
 
 append_manifest_entry() {
-  local src="$1"
-  local status="$2"
-  local message="$3"
-  [[ "$manifest_started" -eq 1 ]] || return 1
-  printf '%s{"source":"%s","status":"%s","message":"%s"}' \
-    "${manifest_first:+,}" \
-    "$(json_escape "$src")" \
-    "$(json_escape "$status")" \
-    "$(json_escape "$message")" >> "$manifest_file"
-  manifest_first=1
+    local src="$1"
+    local status="$2"
+    local message="$3"
+    [[ "$manifest_started" -eq 1 ]] || return 1
+    printf '%s{"source":"%s","status":"%s","message":"%s"}' \
+        "${manifest_first:+,}" \
+        "$(json_escape "$src")" \
+        "$(json_escape "$status")" \
+        "$(json_escape "$message")" >> "$manifest_file"
+    manifest_first=1
 }
 
 write_error() {
-  local src="$1"
-  local message="$2"
-  local safe_name
-  safe_name="$(basename "$src")"
-  cat > "${ERROR_DIR}/${run_id}_${safe_name}.json" <<EOF
+    local src="$1"
+    local message="$2"
+    local safe_name
+    safe_name="$(basename "$src")"
+    cat > "${ERROR_DIR}/${run_id}_${safe_name}.json" <<EOF
 {"timestamp":"$(date -u +"%Y-%m-%dT%H:%M:%SZ")","source":"$src","message":"$message","cleared":false}
 EOF
 }
@@ -75,22 +75,22 @@ if [[ "$SKIP_BACKUP" -eq 0 ]]; then
     write_manifest_start
     manifest_first=""
 
-  while IFS= read -r src || [[ -n "$src" ]]; do
-    [[ -z "$src" || "$src" == \#* ]] && continue
+    while IFS= read -r src || [[ -n "$src" ]]; do
+        [[ -z "$src" || "$src" == \#* ]] && continue
 
-    log "Attempting: $src"
-    if [[ -f "$src" ]]; then
-        cp -p "$src" "$backup_tmp/"
-        log "Copied: $src"
-        append_manifest_entry "$src" "copied" "ok"
-    else
-        log "Missing: $src"
-        write_error "$src" "Source file not found"
-        append_manifest_entry "$src" "missing" "Source file not found"
-    fi
-  done < "$FILES_FILE"
+        log "Attempting: $src"
+        if [[ -f "$src" ]]; then
+            cp -p "$src" "$backup_tmp/"
+            log "Copied: $src"
+            append_manifest_entry "$src" "copied" "ok"
+        else
+            log "Missing: $src"
+            write_error "$src" "Source file not found"
+            append_manifest_entry "$src" "missing" "Source file not found"
+        fi
+    done < "$FILES_FILE"
 
-  cat >> "$manifest_file" <<'EOF'
+    cat >> "$manifest_file" <<'EOF'
 ],"status":"completed"}
 EOF
 
@@ -98,9 +98,11 @@ EOF
     mv "$backup_tmp" "$backup_final"
     log "Backup finalized: $backup_final"
 else
-  log "Backup skipped"
+    log "Backup skipped"
 fi
 
 if [[ "$SKIP_PRUNING" -eq 0 ]]; then
-  log "Pruning skipped for now"
+    log "Pruning skipped for now"
 fi
+
+exit 0
