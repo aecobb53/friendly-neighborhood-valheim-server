@@ -52,7 +52,7 @@ async function refresh() {
 
         for (const server of game.servers) {
 
-            const image = String(server.game ?? "unknown").toLowerCase();
+            const image = String(server.game ?? "unknown");
 
             const card = document.createElement("div");
             card.className = "server-card";
