@@ -1,5 +1,37 @@
 const gamesDiv = document.getElementById("games");
 
+function parseUtcTimestamp(timestamp) {
+    if (!timestamp) {
+        return null;
+    }
+
+    if (typeof timestamp !== "string") {
+        const dt = new Date(timestamp);
+        return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    let normalized = timestamp.trim();
+
+    if (normalized.includes(" ") && !normalized.includes("T")) {
+        normalized = normalized.replace(" ", "T");
+    }
+
+    if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(normalized)) {
+        normalized = `${normalized}Z`;
+    }
+
+    const dt = new Date(normalized);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
+function formatLocalTime(timestamp) {
+    const dt = parseUtcTimestamp(timestamp);
+    if (!dt) {
+        return timestamp ?? "";
+    }
+    return dt.toLocaleString();
+}
+
 async function refresh() {
     const response = await fetch("/api/server-status");
     const data = await response.json();
@@ -20,10 +52,13 @@ async function refresh() {
 
         for (const server of game.servers) {
 
-            const image = server.game ?? "unknown";
+            const image = String(server.game ?? "unknown").toLowerCase();
 
             const card = document.createElement("div");
             card.className = "server-card";
+            card.addEventListener("click", () => {
+                window.location.href = `/server/${encodeURIComponent(server.name)}`;
+            });
 
             card.innerHTML = `
                 <div class="server-header">
@@ -47,9 +82,14 @@ async function refresh() {
                 </div>
 
                 <div class="server-updated">
-                    ${new Date(server.updated).toLocaleString()}
+                    ${formatLocalTime(server.updated)}
                 </div>
             `;
+
+            const cardImage = card.querySelector("img");
+            cardImage.addEventListener("error", () => {
+                cardImage.src = "/static/images/unknown.png";
+            }, { once: true });
 
             grid.appendChild(card);
         }

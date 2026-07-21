@@ -49,6 +49,6 @@ class ValheimParser(BaseParser):
                 if timestamp:
                     content['timestamp'] = timestamp.group(1)
                 else:
-                    content['timestamp'] = datetime.datetime.now().isoformat()
+                    content['timestamp'] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
                 return content['status'], content
         return None, None

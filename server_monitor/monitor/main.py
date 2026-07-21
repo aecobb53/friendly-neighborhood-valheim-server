@@ -50,6 +50,7 @@ class TrackedContainer:
         else:
             print(f"Thread for container {self.container.id} is already running.")
         self.container_status = ContainerStatus.RUNNING
+        self._save_current_state()
 
     def stop(self):
         raise NotImplementedError("Stopping threads is not implemented. You would need to implement a stopping mechanism.")
@@ -71,6 +72,7 @@ class TrackedContainer:
             self.container_status = ContainerStatus.STOPPED
 
     def _save_current_state(self):
+        state_timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         server_status_list = []
         for ssl in self.server_status_list:
             server_status_list.append({
@@ -84,6 +86,7 @@ class TrackedContainer:
             "container_status": self.container_status.value,
             "game_name": self.parser.game_name,
             "server_name": self.server_name,
+            "timestamp": state_timestamp,
             "server_status_list": server_status_list,
         }
         path = os.path.join(
@@ -118,7 +121,7 @@ def initialize():
                 content['server_status_list'].append({
                     "status": ServerStatus.STOPPED.name,
                     "message": "Server has been shut down",
-                    "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+                    "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                 })
                 with open(os.path.join(SHARED_STORAGE, file_path), "w") as f:
                     json.dump(content, f, indent=4)
