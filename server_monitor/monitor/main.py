@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 
 LABEL = "server_monitor.enabled=true"
+HEARTBEAT_SECONDS = int(os.getenv("SERVER_MONITOR_HEARTBEAT_SECONDS", "60"))
 SHARED_STORAGE = os.path.join(
     '/app',
     'storage',
@@ -148,6 +149,21 @@ def watch_containers(client, tracked):
                 )
                 tracked[cid].start()
 
+
+def heartbeat_tracked_states(tracked):
+    while True:
+        if HEARTBEAT_SECONDS <= 0:
+            return
+
+        threading.Event().wait(HEARTBEAT_SECONDS)
+
+        # Iterate over a snapshot in case event handlers modify tracked while we refresh.
+        tracked_snapshot = list(tracked.values())
+        for tracked_container in tracked_snapshot:
+            if tracked_container.container_status == ContainerStatus.RUNNING:
+                tracked_container._save_current_state()
+
 if __name__ == "__main__":
     client, tracked = initialize()
+    threading.Thread(target=heartbeat_tracked_states, args=(tracked,), daemon=True).start()
     watch_containers(client, tracked)
