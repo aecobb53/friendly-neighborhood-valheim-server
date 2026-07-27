@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeader, LoadingState, ErrorState, ServerCard } from '@/components/ui';
 import type { Server } from '@/types/server';
+import { api } from '@/api/client';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import styles from './ServersDashboardPage.module.css';
 
 interface ServerGroup {
@@ -17,6 +19,7 @@ interface DashboardResponse {
 const REFRESH_MS = Number(import.meta.env.VITE_SERVER_DASHBOARD_REFRESH_MS ?? 15000);
 
 export default function ServersDashboardPage() {
+  usePageTitle('Servers');
   const [groups, setGroups] = useState<ServerGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,21 +28,18 @@ export default function ServersDashboardPage() {
     let cancelled = false;
 
     async function loadServers() {
-      try {
-        const response = await fetch('/api/server-status');
-        if (!response.ok) throw new Error(`HTTP_${response.status}`);
+      const response = await api.get<DashboardResponse>('/server-status');
 
-        const data = (await response.json()) as DashboardResponse;
-        if (!cancelled) {
-          setGroups(data.games ?? []);
-          setError(null);
-          setLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setError('Unable to load server information right now.');
-          setLoading(false);
-        }
+      if (!cancelled && response.success) {
+        setGroups(response.data.games ?? []);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      if (!cancelled) {
+        setError('Unable to load server information right now.');
+        setLoading(false);
       }
     }
 

@@ -1,8 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/ui';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function ServerOverviewPage() {
   const { name } = useParams<{ name: string }>();
+  usePageTitle(name);
 
   return (
     <div>
