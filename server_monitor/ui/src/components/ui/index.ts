@@ -5,6 +5,7 @@ export { default as LoadingState } from './LoadingState';
 export { default as ErrorState } from './ErrorState';
 export { default as StatusBadge } from './StatusBadge';
 export { default as ServerCard } from './ServerCard';
+export { default as TaskCard } from './TaskCard';
 export { default as CommunityFeed } from './CommunityFeed';
 export { default as FeaturedCarousel } from './FeaturedCarousel';
 export type { CarouselSlide } from './FeaturedCarousel';

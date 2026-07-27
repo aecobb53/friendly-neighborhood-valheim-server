@@ -35,7 +35,7 @@ The navigation is divided into three logical sections.
 ```text
 ┌──────────────────────────────────────────────────────────────────────┐
 │                                                                      │
-│  <Logo> Server Monitor     Events  Gallery  Tasks          Servers    │
+│  <Logo> Server Monitor     Events  Gallery  Requests       Servers    │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
@@ -65,7 +65,7 @@ Initially:
 
 * Events
 * Gallery
-* Tasks
+* Requests
 
 Additional pages may be added in the future if they become core parts of the application.
 

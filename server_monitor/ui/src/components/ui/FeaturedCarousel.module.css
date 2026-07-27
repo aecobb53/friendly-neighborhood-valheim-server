@@ -23,6 +23,18 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  border: none;
+  padding: 0;
+  display: block;
+}
+
+.slideClickable {
+  cursor: pointer;
+}
+
+.slide:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-accent-blue) 80%, white);
+  outline-offset: -3px;
 }
 
 .placeholder {

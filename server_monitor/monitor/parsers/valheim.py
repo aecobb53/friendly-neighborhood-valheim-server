@@ -7,7 +7,7 @@ from .common import BaseParser, ServerStatus
 class ValheimParser(BaseParser):
     status_pattern = {
         r"Initializing your container": {
-            "status": ServerStatus.INITIALIZING,
+            "status": ServerStatus.STARTING,
             "message": "Initializing Server in Container"
         },
         r"Downloading update": {
@@ -27,7 +27,7 @@ class ValheimParser(BaseParser):
             "message": "Registering Server Lobby with Valheim Master Server"
         },
         r"Game server connected": {
-            "status": ServerStatus.RUNNING,
+            "status": ServerStatus.ONLINE,
             "message": "Server is Running and Connected to Master Server"
         },
     }

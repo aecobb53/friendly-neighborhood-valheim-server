@@ -120,7 +120,7 @@ def initialize():
                 content = json.load(jf)
                 content['container_status'] = ContainerStatus.STOPPED.value
                 content['server_status_list'].append({
-                    "status": ServerStatus.STOPPED.name,
+                    "status": ServerStatus.OFFLINE.name,
                     "message": "Server has been shut down",
                     "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
                 })

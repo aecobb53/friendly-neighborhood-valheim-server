@@ -1,8 +1,13 @@
 from pathlib import Path
 import json
 from datetime import datetime, timezone
+import random
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, Request
+import yaml
+from pydantic import BaseModel
+
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -16,6 +21,11 @@ SERVERS_DIR = Path("/app/servers")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+
+class RequestsQueryParams(BaseModel):
+    id: str | None = None
+    server: str | None = None
 
 
 def parse_timestamp(timestamp: str) -> datetime:
@@ -139,62 +149,207 @@ async def server_page(request: Request, server_name: str):
 @app.get('/api/server-status', status_code=200)
 def server_status():
     response = {
-        "last_updated": "2026-07-27T15:00:00Z",
-        "games": [
-            {
-            "name": "Valheim",
+        "last_updated": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "games": [],
+    }
+
+    servers_by_name = find_servers()
+    latest_servers = [server_list[-1] for server_list in servers_by_name.values() if server_list]
+    games = {}
+
+    for latest_server in latest_servers:
+        game_name = latest_server.get('game_name', 'Unknown')
+        if game_name not in games:
+            games[game_name] = []
+        games[game_name].append(latest_server)
+
+    for game, game_servers in games.items():
+        game_payload = {
+            "name": game,
             "image": "SERVER IIMAGE",
-            "servers": [
-                {
-                "id": "container-id",
-                "name": "Hellheim",
-                "game": "Valheim",
-                "container_status": "running",
-                "server_status": "ONLINE",
+            "servers": [],
+        }
+        for server in game_servers:
+            if not len(server['server_status_list']):
+                continue
+            current_status = server['server_status_list'][-1]
+            game_payload['servers'].append({
+                "id": server['container_id'],
+                "name": server['server_name'],
+                "game": server.get('game_name', 'unknown'),
+                "container_status": server['container_status'],
+                "server_status": current_status['status'],
                 "healthy": True,
-                "last_message": "Server started successfully",
-                "updated": "2026-07-27T14:55:00Z"
-                }
-            ]
-            }
-        ]
-        }
+                "last_message": current_status['message'],
+                "updated": current_status['timestamp'],
+            })
+        response['games'].append(game_payload)
+
+
+
+    # response = {
+    #     "last_updated": "2026-07-27T15:00:00Z",
+    #     "games": [
+    #         {
+    #         "name": "Valheim",
+    #         "image": "SERVER IIMAGE",
+    #         "servers": [
+    #             {
+    #             "id": "container-id",
+    #             "name": "Hellheim",
+    #             "game": "Valheim",
+    #             "container_status": "running",
+    #             "server_status": "ONLINE",
+    #             "healthy": True,
+    #             "last_message": "Server started successfully",
+    #             "updated": "2026-07-27T14:55:00Z"
+    #             }
+    #         ]
+    #         }
+    #     ]
+    #     }
     return {
         "success": True,
         "data": response
     }
 
 
-@app.get('/api/server-info/{server_name}', status_code=200)
-def server_info(server_name: str):
-    response = {
-        "server_name": "Hellheim",
-        "display_name": "Hellheim",
-        "game": "Valheim",
-        "description": "Our main Valheim survival world.",
-        "container_status": "running",
-        "timestamp": "2026-07-27T15:00:00Z",
-        "server_status_list": [
-            {
-            "status": "ONLINE",
-            "message": "Server started successfully",
-            "timestamp": "2026-07-27T14:55:00Z"
-            }
-        ],
-        "display_status": "ONLINE"
-        }
-    return {
-        "success": True,
-        "data": response
-    }
+# @app.get('/api/server-info/{server_name}', status_code=200)
+# def server_info(server_name: str):
+#     response = {
+#         "server_name": "Hellheim",
+#         "display_name": "Hellheim",
+#         "game": "Valheim",
+#         "description": "Our main Valheim survival world.",
+#         "container_status": "running",
+#         "timestamp": "2026-07-27T15:00:00Z",
+#         "server_status_list": [
+#             {
+#             "status": "ONLINE",
+#             "message": "Server started successfully",
+#             "timestamp": "2026-07-27T14:55:00Z"
+#             }
+#         ],
+#         "display_status": "ONLINE"
+#         }
+#     return {
+#         "success": True,
+#         "data": response
+#     }
 
 
 @app.get('/api/feed', status_code=200)
-def feed():
+@app.get('/api/feed/{page}', status_code=200)
+def feed(page: str | None = None):
+    print(f"PAGE: {page}")
+    funny_feed_stocks = [
+        "AAPL",
+        "NVDA",
+        "GOOG",
+        "MSFT",
+        "AMZN",
+        "AVGO",
+        "META",
+        "TSLA",
+        "LLY",
+        "CMG",
+        "AMD",
+        "XL",
+        "ABMD",
+        "UA",
+        "HFC",
+        "TRIP",
+        "M",
+        "TWTR",
+        "CPRT",
+        "BR",
+        "ILMN",
+        "AMZN",
+        "HCA",
+        "FFIV",
+        "VRSN",
+        "RHI",
+        "CTL",
+        "TJX",
+        "ANDV",
+        "IDX",
+    ]
+
+    def form_funny_stock(ticker: str):
+        return f"{ticker}: {random.uniform(-10, 10):.2f}"
+    random.shuffle(funny_feed_stocks)
+    response = [form_funny_stock(s) for s in funny_feed_stocks]
+
+
+    with open('static/content/feed.yaml', 'r') as file:
+        data = yaml.safe_load(file)
+        print(json.dumps(data, indent=4))
+        resposne2 = []
+        for one, two in data.items():
+            for three in two:
+                resposne2.append(three)
+    # response = resposne2
+
+    # response = [
+    # "⚔ Boss fight Friday at 8 PM",
+    # "💡 Repair your gear before sailing",
+    # "🎉 Happy Birthday Andrew!"
+    # ]
+    return {
+        "success": True,
+        "data": response
+    }
+
+@app.get('/api/whats-new', status_code=200)
+def whats_new():
     response = [
-    "⚔ Boss fight Friday at 8 PM",
-    "💡 Repair your gear before sailing",
-    "🎉 Happy Birthday Andrew!"
+    "New Website",
+    "Valheim is coming back",
+    "New Valheim server: Hellheim - More to come!"
+    ]
+    return {
+        "success": True,
+        "data": response
+    }
+
+@app.get('/api/carousel', status_code=200)
+@app.get('/api/carousel/{page}', status_code=200)
+def carousel(page: str | None = None):
+    print(f"PAGE: {page}")
+    response = [
+        {
+            "id": "home-1",
+            "image": "/static/images/carousel/Valheim.png",
+            "alt": "Community build at sunset",
+            "title": "RockandStone server is back!",
+            "subtitle": "Restart our journey in Valheim.",
+            "href": "/servers"
+        },
+        {
+            "id": "home-2",
+            "image": "/static/images/carousel/Valheim.png",
+            "alt": "Another page",
+            "title": "Hellheim",
+            "subtitle": "There is a new server we're considering supporting! Hardcore mode coming to you!",
+            "href": "/servers"
+        },  
+        {
+            "id": "home-3",
+            "image": "/static/images/carousel/Minecraft.png",
+            "alt": "Another page",
+            "title": "Do we want to start a Minecraft server?",
+            "subtitle": "There were some talks about this if anybody is interested.",
+            "href": "/servers"
+        },
+        {
+            "id": "home-4",
+            "image": "/static/images/carousel/Windrose.png",
+            "alt": "Another page",
+            "title": "Windrose",
+            "subtitle": "Windrose is similar to Valheim, we could look into hosting that as another game.",
+            "href": "/servers"
+        },
+
     ]
     return {
         "success": True,
@@ -205,4 +360,173 @@ def feed():
 
 
 
+@app.get('/api/requests', status_code=200)
+def requests(query: Annotated[RequestsQueryParams, Depends()]):
+    response = [
+        {
+            "id": "req-001",
+            "server": "valheim-main",
+            "title": "Need stone and iron for longhouse",
+            "requested_by": "Alex",
+            "urgency": "Soon",
+            "description": "Looking for help gathering stone and iron.\nCan trade food and potions.",
+            "image": None,
+            "created_at": "2026-07-27T18:00:00Z",
+            "completed": False,
+            "archived": False,
+        },
+        {
+            "id": "req-001",
+            "server": "valheim-main",
+            "title": "Need stone and iron for longhouse",
+            "requested_by": "Alex",
+            "urgency": "Soon",
+            "description": "I need 200 fine wood and 100 stone to the castle please!",
+            "image": None,
+            "created_at": "2026-07-27T18:00:00Z",
+            "completed": True,
+            "archived": False,
+        },
+    ]
 
+    if query.id:
+        response = [item for item in response if item.get("id") == query.id]
+
+    if query.server:
+        response = [item for item in response if item.get("server") == query.server]
+
+    return {
+        "success": True,
+        "data": response
+    }
+
+
+@app.post('/api/requests', status_code=201)
+def create_requests():
+    print(f'POST RECEIVED')
+    # response = {
+    #     "title":"More server events",
+    #     "description":"We should host a community raid night.",
+    #     "created_by":"Sam"};
+    response = {
+        "id": "req-001",
+        "server": "valheim-main",
+        "title": "Need stone and iron for longhouse",
+        "requested_by": "Alex",
+        "urgency": "Soon",
+        "description": "Looking for help gathering stone and iron.\nCan trade food and potions.",
+        "image": None,
+        "created_at": "2026-07-27T18:00:00Z",
+        "completed": False,
+        "archived": False,
+    }
+    return {
+        "success": True,
+        "data": response
+    }
+
+
+@app.put('/api/requests/{request_id}', status_code=200)
+def update_requests(request_id: str):
+    print(f'PUT RECEIVED')
+    # response = {
+    #     "title":"More server events",
+    #     "description":"We should host a community raid night.",
+    #     "created_by":"Sam"};
+    response = {
+        "id": "req-001",
+        "server": "valheim-main",
+        "title": "Need stone and iron for longhouse",
+        "requested_by": "Alex",
+        "urgency": "Soon",
+        "description": "Looking for help gathering stone and iron.\nCan trade food and potions.",
+        "image": None,
+        "created_at": "2026-07-27T18:00:00Z",
+        "completed": False,
+        "archived": False,
+    }
+    return {
+        "success": True,
+        "data": response
+    }
+
+
+@app.get('/api/server-info/{server_name}', status_code=200)
+def server_info(server_name: str):
+    response = {
+        "server_name": "valheim-main",
+        "display_name": "Hellheim",
+        "game": "Valheim",
+        "description": "Long-term cooperative world focused on exploration and builds.",
+        "container_status": "running",
+        "display_status": "ONLINE",
+        "timestamp": "2026-07-27T19:12:00Z",
+        "quick_info": {
+            "world": "Hellheim_02",
+            "server_version": "0.219.14",
+            "modpack_version": "bepinex-5.4.23",
+            "last_restart": "2026-07-27T12:00:00Z",
+            "uptime_seconds": 25920,
+            "max_players": 10,
+            "time_zone": "UTC"
+        },
+        "server_status_list": [
+            {
+                "status": "ONLINE",
+                "message": "Server started successfully",
+                "timestamp": "2026-07-27T12:00:12Z"
+            },
+            {
+                "status": "ONLINE",
+                "message": "World save complete",
+                "timestamp": "2026-07-27T18:45:03Z"
+            }
+        ]
+    }
+    return {
+        "success": True,
+        "data": response
+    }
+
+@app.get('/api/servers/{server_name}/news', status_code=200)
+def server_news(server_name: str):
+    response = [
+        {
+            "id": "news-901",
+            "text": "New mountain outpost completed near spawn.",
+            "timestamp": "2026-07-27T17:30:00Z"
+        },
+        {
+            "id": "news-902",
+            "text": "Moder raid planned for Friday night.",
+            "timestamp": "2026-07-27T18:10:00Z"
+        }
+    ]
+    return {
+        "success": True,
+        "data": response
+    }
+
+@app.get('/api/servers/{server_name}/rules', status_code=200)
+def server_rules(server_name: str):
+    response = [
+        "Be respectful in shared areas.",
+        "Label portal destinations clearly.",
+        "Ask before modifying another player's build."
+    ]
+    return {
+        "success": True,
+        "data": response
+    }
+
+@app.get('/api/servers/{server_name}/logs', status_code=200)
+def server_logs(server_name: str, limit: int = 50):
+    response = [
+        "[19:01:21] World saved",
+        "[18:59:02] Player Maya joined",
+        "[18:43:17] Boss defeated"
+    ][:limit]
+    return {
+        "success": True,
+        "data": response
+    }

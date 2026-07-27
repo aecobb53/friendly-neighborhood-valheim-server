@@ -4,7 +4,7 @@ import styles from './Navbar.module.css';
 const CENTER_LINKS = [
   { to: '/events', label: 'Events' },
   { to: '/gallery', label: 'Gallery' },
-  { to: '/tasks', label: 'Tasks' },
+  { to: '/requests', label: 'Requests' },
 ];
 
 export default function Navbar() {

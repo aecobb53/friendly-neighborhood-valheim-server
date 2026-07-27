@@ -2,13 +2,13 @@ from enum import Enum
 
 
 class ServerStatus(Enum):
-    INITIALIZING = 'Initializing Server in Container'
+    STARTING = 'Initializing Server in Container'
     UPDATING = 'Updating Server from Steam'
     INSTALLING_MODS = 'Installing Server Mods'
     REGISTERING = 'Registering Server Lobby with Master Server'
-    RUNNING = 'Server is Running'
+    ONLINE = 'Server is Running'
     UNKNOWN = 'Unknown Server Status'
-    STOPPED = 'Server is no longer used'
+    OFFLINE = 'Server is no longer used'
 
 
 class BaseParser:

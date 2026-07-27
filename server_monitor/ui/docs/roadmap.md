@@ -75,13 +75,11 @@ If a task becomes too large, it should be divided into additional implementation
 
 Current Phase:
 
-**Phase 1**
+**Phase 2**
 
 Current Task:
 
-**Task 1.1 - Project Foundation**
-
----
+**Task 2.4 - Requests Page**
 
 # Phase 1 - Minimum Viable Community Hub
 
@@ -307,7 +305,7 @@ At the completion of this phase users should be able to:
 
 ## Task 2.1 - Image Carousel
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: S
 
@@ -319,7 +317,7 @@ Reference:
 
 ## Task 2.2 - Task Card
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: XS
 
@@ -329,9 +327,9 @@ Reference:
 
 ---
 
-## Task 2.3 - Overview Page
+## Task 2.3 - Server Page
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 
@@ -341,11 +339,11 @@ Dependencies:
 
 Reference:
 
-`docs/pages/overview.md`
+`docs/pages/server.md`
 
 ---
 
-## Task 2.4 - Tasks Page
+## Task 2.4 - Requests Page
 
 Status: ☐ Not Started
 
@@ -357,7 +355,7 @@ Dependencies:
 
 Reference:
 
-`docs/pages/tasks.md`
+`docs/pages/requests.md`
 
 ---
 

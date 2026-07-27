@@ -64,7 +64,7 @@ function mapCarouselItems(items: CarouselApiItem[]): CarouselSlide[] {
 const NAV_CARDS = [
   { to: '/events',  label: 'Events',  icon: '📅', description: 'Upcoming battles, raids, and community nights.' },
   { to: '/gallery', label: 'Gallery', icon: '🖼', description: 'Screenshots and highlights from the community.' },
-  { to: '/tasks',   label: 'Tasks',   icon: '📋', description: 'Community goals and shared to-do lists.' },
+  { to: '/requests', label: 'Requests', icon: '📋', description: 'Community goals and shared requests.' },
   { to: '/servers', label: 'Servers', icon: '⚔', description: 'View all game servers and their current status.' },
 ];
 

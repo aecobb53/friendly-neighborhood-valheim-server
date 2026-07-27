@@ -128,7 +128,7 @@ Initially these include:
 
 * Events
 * Gallery
-* Tasks
+* Requests
 * Servers
 
 Each navigation card should:
