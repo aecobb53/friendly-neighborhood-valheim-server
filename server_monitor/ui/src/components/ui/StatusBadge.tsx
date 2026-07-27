@@ -7,14 +7,16 @@ interface StatusBadgeProps {
 
 function normalise(raw: string): ServerStatus {
   const upper = raw.toUpperCase();
-  const valid: ServerStatus[] = ['ONLINE', 'OFFLINE', 'UPDATING', 'RESTARTING', 'ERROR'];
+  const valid: ServerStatus[] = ['ONLINE', 'OFFLINE', 'STARTING', 'UPDATING', 'RESTARTING', 'ERROR'];
   return valid.includes(upper as ServerStatus) ? (upper as ServerStatus) : 'UNKNOWN';
 }
 
 const LABELS: Record<ServerStatus, string> = {
   ONLINE: 'Online',
   OFFLINE: 'Offline',
+  STARTING: 'Starting',
   UPDATING: 'Updating',
+  REGISTERING: 'Registering',
   RESTARTING: 'Restarting',
   ERROR: 'Error',
   UNKNOWN: 'Unknown',

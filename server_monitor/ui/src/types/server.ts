@@ -28,4 +28,4 @@ export interface ServerStatusEntry {
   timestamp: string;
 }
 
-export type ServerStatus = 'ONLINE' | 'OFFLINE' | 'UPDATING' | 'RESTARTING' | 'ERROR' | 'UNKNOWN';
+export type ServerStatus = 'ONLINE' | 'OFFLINE' | 'STARTING' | 'UPDATING' | 'REGISTERING' | 'RESTARTING' | 'ERROR' | 'UNKNOWN';
