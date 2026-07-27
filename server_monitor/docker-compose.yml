@@ -19,4 +19,16 @@ services:
       - "traefik.http.routers.server_monitor.rule=Host(`server-monitor.nax.lol`)"
       - "traefik.http.routers.server_monitor.entrypoints=websecure"
       - "traefik.http.routers.server_monitor.tls.certresolver=myresolver"
+  ui:
+    build: ./ui
+    container_name: GameServerMonitorUI
+    depends_on:
+      - api
+    ports:
+      - "8209:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server_monitor_ui.rule=Host(`server-monitor-ui.nax.lol`)"
+      - "traefik.http.routers.server_monitor_ui.entrypoints=websecure"
+      - "traefik.http.routers.server_monitor_ui.tls.certresolver=myresolver"
 

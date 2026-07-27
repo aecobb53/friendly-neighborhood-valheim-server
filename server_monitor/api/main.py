@@ -57,79 +57,152 @@ async def server_page(request: Request, server_name: str):
         context={"server_name": server_name},
     )
 
-@app.get('/api/server-status')
+# @app.get('/api/server-status')
+# def server_status():
+#     response = {
+#         "last_updated": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+#         "games": [],
+#     }
+
+#     servers_by_name = find_servers()
+#     latest_servers = [server_list[-1] for server_list in servers_by_name.values() if server_list]
+#     games = {}
+
+#     for latest_server in latest_servers:
+#         game_name = latest_server.get('game_name', 'Unknown')
+#         if game_name not in games:
+#             games[game_name] = []
+#         games[game_name].append(latest_server)
+
+#     for game, game_servers in games.items():
+#         game_payload = {
+#             "name": game,
+#             "image": "SERVER IIMAGE",
+#             "servers": [],
+#         }
+#         for server in game_servers:
+#             if not len(server['server_status_list']):
+#                 continue
+#             current_status = server['server_status_list'][-1]
+#             game_payload['servers'].append({
+#                 "id": server['container_id'],
+#                 "name": server['server_name'],
+#                 "game": server.get('game_name', 'unknown'),
+#                 "container_status": server['container_status'],
+#                 "server_status": current_status['status'],
+#                 "healthy": True,
+#                 "last_message": current_status['message'],
+#                 "updated": current_status['timestamp'],
+#             })
+#         response['games'].append(game_payload)
+#     return response
+
+
+# @app.get('/api/server-info/{server_name}')
+# def server_info(server_name: str):
+#     for fl in list(SERVERS_DIR.iterdir()):
+#         with open(fl) as jf:
+#             server_config = json.load(jf)
+#             if server_config['server_name'] == server_name:
+#                 break
+#     else:
+#         raise HTTPException(status_code=404, detail="Server not found")
+
+#     response = {
+#         "server_name": server_name,
+#         "display_name": server_config['display_name'],
+#         "game": server_config['game'],
+#         "description": server_config['description'],
+#         "container_status": "UNKNOWN",
+#         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+#         "server_status_list": [],
+#         "display_status": "UNKNOWN",
+#     }
+
+#     # Find server to determine status
+#     servers = find_servers()
+#     server_list = servers.get(server_name, [])
+
+#     if not server_list:
+#         return response
+
+#     latest_server = server_list[-1]
+#     response['container_status'] = latest_server.get('container_status', 'UNKNOWN')
+#     response['timestamp'] = latest_server.get('timestamp', 'UNKNOWN')
+#     response['server_status_list'] = latest_server['server_status_list']
+#     response['display_status'] = latest_server['server_status_list'][-1]['status'] if latest_server['server_status_list'] else "UNKNOWN"
+
+#     return response
+
+
+# UI Refactor endpoints
+@app.get('/api/server-status', status_code=200)
 def server_status():
     response = {
-        "games": [],
-        "last_updated": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-    }
-
-    servers_by_name = find_servers()
-    latest_servers = [server_list[-1] for server_list in servers_by_name.values() if server_list]
-    games = {}
-
-    for latest_server in latest_servers:
-        game_name = latest_server.get('game_name', 'Unknown')
-        if game_name not in games:
-            games[game_name] = []
-        games[game_name].append(latest_server)
-
-    for game, game_servers in games.items():
-        game_payload = {
-            "name": game,
+        "last_updated": "2026-07-27T15:00:00Z",
+        "games": [
+            {
+            "name": "Valheim",
             "image": "SERVER IIMAGE",
-            "servers": [],
-        }
-        for server in game_servers:
-            if not len(server['server_status_list']):
-                continue
-            current_status = server['server_status_list'][-1]
-            game_payload['servers'].append({
-                "id": server['container_id'],
-                "name": server['server_name'],
-                "game": server.get('game_name', 'unknown'),
-                "container_status": server['container_status'],
-                "server_status": current_status['status'],
+            "servers": [
+                {
+                "id": "container-id",
+                "name": "Hellheim",
+                "game": "Valheim",
+                "container_status": "running",
+                "server_status": "ONLINE",
                 "healthy": True,
-                "last_message": current_status['message'],
-                "updated": current_status['timestamp'],
-            })
-        response['games'].append(game_payload)
-    return response
-
-
-@app.get('/api/server-info/{server_name}')
-def server_info(server_name: str):
-    for fl in list(SERVERS_DIR.iterdir()):
-        with open(fl) as jf:
-            server_config = json.load(jf)
-            if server_config['server_name'] == server_name:
-                break
-    else:
-        raise HTTPException(status_code=404, detail="Server not found")
-
-    response = {
-        "server_name": server_name,
-        "display_name": server_config['display_name'],
-        "game": server_config['game'],
-        "description": server_config['description'],
-        "container_status": "UNKNOWN",
-        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "server_status_list": [],
-        "display_status": "UNKNOWN",
+                "last_message": "Server started successfully",
+                "updated": "2026-07-27T14:55:00Z"
+                }
+            ]
+            }
+        ]
+        }
+    return {
+        "success": True,
+        "data": response
     }
 
-    # Find server to determine status
-    servers = find_servers()
-    server_list = servers.get(server_name, [])
 
-    if not server_list:
-        return response
+@app.get('/api/server-info/{server_name}', status_code=200)
+def server_info(server_name: str):
+    response = {
+        "server_name": "Hellheim",
+        "display_name": "Hellheim",
+        "game": "Valheim",
+        "description": "Our main Valheim survival world.",
+        "container_status": "running",
+        "timestamp": "2026-07-27T15:00:00Z",
+        "server_status_list": [
+            {
+            "status": "ONLINE",
+            "message": "Server started successfully",
+            "timestamp": "2026-07-27T14:55:00Z"
+            }
+        ],
+        "display_status": "ONLINE"
+        }
+    return {
+        "success": True,
+        "data": response
+    }
 
-    latest_server = server_list[-1]
-    response['container_status'] = latest_server.get('container_status', 'UNKNOWN')
-    response['timestamp'] = latest_server.get('timestamp', 'UNKNOWN')
-    response['server_status_list'] = latest_server['server_status_list']
-    response['display_status'] = latest_server['server_status_list'][-1]['status'] if latest_server['server_status_list'] else "UNKNOWN"
 
-    return response
+@app.get('/api/feed', status_code=200)
+def feed():
+    response = [
+    "⚔ Boss fight Friday at 8 PM",
+    "💡 Repair your gear before sailing",
+    "🎉 Happy Birthday Andrew!"
+    ]
+    return {
+        "success": True,
+        "data": response
+    }
+
+
+
+
+
+
