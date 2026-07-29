@@ -12,11 +12,23 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+import logging
+from set_logger import set_logger
+set_logger()
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
 DATA_DIR = Path("/app/storage")
 SERVERS_DIR = Path("/app/servers")
+
+from routes.exceptions import ServerNotFoundError
+
+from routes.servers.route import router as service_router
+from routes.exception_handler import server_not_found
+
+app.include_router(service_router)
+app.add_exception_handler(ServerNotFoundError, server_not_found)
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -26,30 +38,6 @@ templates = Jinja2Templates(directory="templates")
 class RequestsQueryParams(BaseModel):
     id: str | None = None
     server: str | None = None
-
-
-def parse_timestamp(timestamp: str) -> datetime:
-    try:
-        return datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-    except ValueError:
-        return datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-
-def find_servers():
-    servers = {}
-
-    for file in DATA_DIR.glob("*.json"):
-        with open(file) as f:
-            server_info = json.load(f)
-            server_name = server_info['server_name']
-            if server_name not in servers:
-                servers[server_name] = []
-            servers[server_name].append(server_info)
-
-    sorted_servers = {
-        key: sorted(list_of_dicts, key=lambda x: parse_timestamp(x["timestamp"]))
-        for key, list_of_dicts in servers.items()
-    }
-    return sorted_servers
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -67,234 +55,17 @@ async def server_page(request: Request, server_name: str):
         context={"server_name": server_name},
     )
 
-# @app.get('/api/server-status')
-# def server_status():
-#     response = {
-#         "last_updated": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-#         "games": [],
-#     }
-
-#     servers_by_name = find_servers()
-#     latest_servers = [server_list[-1] for server_list in servers_by_name.values() if server_list]
-#     games = {}
-
-#     for latest_server in latest_servers:
-#         game_name = latest_server.get('game_name', 'Unknown')
-#         if game_name not in games:
-#             games[game_name] = []
-#         games[game_name].append(latest_server)
-
-#     for game, game_servers in games.items():
-#         game_payload = {
-#             "name": game,
-#             "image": "SERVER IIMAGE",
-#             "servers": [],
-#         }
-#         for server in game_servers:
-#             if not len(server['server_status_list']):
-#                 continue
-#             current_status = server['server_status_list'][-1]
-#             game_payload['servers'].append({
-#                 "id": server['container_id'],
-#                 "name": server['server_name'],
-#                 "game": server.get('game_name', 'unknown'),
-#                 "container_status": server['container_status'],
-#                 "server_status": current_status['status'],
-#                 "healthy": True,
-#                 "last_message": current_status['message'],
-#                 "updated": current_status['timestamp'],
-#             })
-#         response['games'].append(game_payload)
-#     return response
-
-
-# @app.get('/api/server-info/{server_name}')
-# def server_info(server_name: str):
-#     for fl in list(SERVERS_DIR.iterdir()):
-#         with open(fl) as jf:
-#             server_config = json.load(jf)
-#             if server_config['server_name'] == server_name:
-#                 break
-#     else:
-#         raise HTTPException(status_code=404, detail="Server not found")
-
-#     response = {
-#         "server_name": server_name,
-#         "display_name": server_config['display_name'],
-#         "game": server_config['game'],
-#         "description": server_config['description'],
-#         "container_status": "UNKNOWN",
-#         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-#         "server_status_list": [],
-#         "display_status": "UNKNOWN",
-#     }
-
-#     # Find server to determine status
-#     servers = find_servers()
-#     server_list = servers.get(server_name, [])
-
-#     if not server_list:
-#         return response
-
-#     latest_server = server_list[-1]
-#     response['container_status'] = latest_server.get('container_status', 'UNKNOWN')
-#     response['timestamp'] = latest_server.get('timestamp', 'UNKNOWN')
-#     response['server_status_list'] = latest_server['server_status_list']
-#     response['display_status'] = latest_server['server_status_list'][-1]['status'] if latest_server['server_status_list'] else "UNKNOWN"
-
-#     return response
-
-
-# UI Refactor endpoints
-@app.get('/api/server-status', status_code=200)
-def server_status():
-    response = {
-        "last_updated": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "games": [],
-    }
-
-    servers_by_name = find_servers()
-    latest_servers = [server_list[-1] for server_list in servers_by_name.values() if server_list]
-    games = {}
-
-    for latest_server in latest_servers:
-        game_name = latest_server.get('game_name', 'Unknown')
-        if game_name not in games:
-            games[game_name] = []
-        games[game_name].append(latest_server)
-
-    for game, game_servers in games.items():
-        game_payload = {
-            "name": game,
-            "image": "SERVER IIMAGE",
-            "servers": [],
-        }
-        for server in game_servers:
-            if not len(server['server_status_list']):
-                continue
-            current_status = server['server_status_list'][-1]
-            game_payload['servers'].append({
-                "id": server['container_id'],
-                "name": server['server_name'],
-                "game": server.get('game_name', 'unknown'),
-                "container_status": server['container_status'],
-                "server_status": current_status['status'],
-                "healthy": True,
-                "last_message": current_status['message'],
-                "updated": current_status['timestamp'],
-            })
-        response['games'].append(game_payload)
-
-
-
-    # response = {
-    #     "last_updated": "2026-07-27T15:00:00Z",
-    #     "games": [
-    #         {
-    #         "name": "Valheim",
-    #         "image": "SERVER IIMAGE",
-    #         "servers": [
-    #             {
-    #             "id": "container-id",
-    #             "name": "Hellheim",
-    #             "game": "Valheim",
-    #             "container_status": "running",
-    #             "server_status": "ONLINE",
-    #             "healthy": True,
-    #             "last_message": "Server started successfully",
-    #             "updated": "2026-07-27T14:55:00Z"
-    #             }
-    #         ]
-    #         }
-    #     ]
-    #     }
-    return {
-        "success": True,
-        "data": response
-    }
-
-
-# @app.get('/api/server-info/{server_name}', status_code=200)
-# def server_info(server_name: str):
-#     response = {
-#         "server_name": "Hellheim",
-#         "display_name": "Hellheim",
-#         "game": "Valheim",
-#         "description": "Our main Valheim survival world.",
-#         "container_status": "running",
-#         "timestamp": "2026-07-27T15:00:00Z",
-#         "server_status_list": [
-#             {
-#             "status": "ONLINE",
-#             "message": "Server started successfully",
-#             "timestamp": "2026-07-27T14:55:00Z"
-#             }
-#         ],
-#         "display_status": "ONLINE"
-#         }
-#     return {
-#         "success": True,
-#         "data": response
-#     }
-
 
 @app.get('/api/feed', status_code=200)
 @app.get('/api/feed/{page}', status_code=200)
 def feed(page: str | None = None):
-    print(f"PAGE: {page}")
-    funny_feed_stocks = [
-        "AAPL",
-        "NVDA",
-        "GOOG",
-        "MSFT",
-        "AMZN",
-        "AVGO",
-        "META",
-        "TSLA",
-        "LLY",
-        "CMG",
-        "AMD",
-        "XL",
-        "ABMD",
-        "UA",
-        "HFC",
-        "TRIP",
-        "M",
-        "TWTR",
-        "CPRT",
-        "BR",
-        "ILMN",
-        "AMZN",
-        "HCA",
-        "FFIV",
-        "VRSN",
-        "RHI",
-        "CTL",
-        "TJX",
-        "ANDV",
-        "IDX",
-    ]
-
-    def form_funny_stock(ticker: str):
-        return f"{ticker}: {random.uniform(-10, 10):.2f}"
-    random.shuffle(funny_feed_stocks)
-    response = [form_funny_stock(s) for s in funny_feed_stocks]
-
-
+    response = []
     with open('static/content/feed.yaml', 'r') as file:
         data = yaml.safe_load(file)
-        print(json.dumps(data, indent=4))
-        resposne2 = []
-        for one, two in data.items():
-            for three in two:
-                resposne2.append(three)
-    # response = resposne2
-
-    # response = [
-    # "⚔ Boss fight Friday at 8 PM",
-    # "💡 Repair your gear before sailing",
-    # "🎉 Happy Birthday Andrew!"
-    # ]
+        for _, section in data.items():
+            for _, feed_item in section.items():
+                response.extend(feed_item)
+    random.shuffle(response)
     return {
         "success": True,
         "data": response
@@ -404,10 +175,6 @@ def requests(query: Annotated[RequestsQueryParams, Depends()]):
 @app.post('/api/requests', status_code=201)
 def create_requests():
     print(f'POST RECEIVED')
-    # response = {
-    #     "title":"More server events",
-    #     "description":"We should host a community raid night.",
-    #     "created_by":"Sam"};
     response = {
         "id": "req-001",
         "server": "valheim-main",
@@ -429,10 +196,7 @@ def create_requests():
 @app.put('/api/requests/{request_id}', status_code=200)
 def update_requests(request_id: str):
     print(f'PUT RECEIVED')
-    # response = {
-    #     "title":"More server events",
-    #     "description":"We should host a community raid night.",
-    #     "created_by":"Sam"};
+
     response = {
         "id": "req-001",
         "server": "valheim-main",
@@ -445,87 +209,6 @@ def update_requests(request_id: str):
         "completed": False,
         "archived": False,
     }
-    return {
-        "success": True,
-        "data": response
-    }
-
-
-@app.get('/api/server-info/{server_name}', status_code=200)
-def server_info(server_name: str):
-    response = {
-        "server_name": "valheim-main",
-        "display_name": "Hellheim",
-        "game": "Valheim",
-        "description": "Long-term cooperative world focused on exploration and builds.",
-        "container_status": "running",
-        "display_status": "ONLINE",
-        "timestamp": "2026-07-27T19:12:00Z",
-        "quick_info": {
-            "world": "Hellheim_02",
-            "server_version": "0.219.14",
-            "modpack_version": "bepinex-5.4.23",
-            "last_restart": "2026-07-27T12:00:00Z",
-            "uptime_seconds": 25920,
-            "max_players": 10,
-            "time_zone": "UTC"
-        },
-        "server_status_list": [
-            {
-                "status": "ONLINE",
-                "message": "Server started successfully",
-                "timestamp": "2026-07-27T12:00:12Z"
-            },
-            {
-                "status": "ONLINE",
-                "message": "World save complete",
-                "timestamp": "2026-07-27T18:45:03Z"
-            }
-        ]
-    }
-    return {
-        "success": True,
-        "data": response
-    }
-
-@app.get('/api/servers/{server_name}/news', status_code=200)
-def server_news(server_name: str):
-    response = [
-        {
-            "id": "news-901",
-            "text": "New mountain outpost completed near spawn.",
-            "timestamp": "2026-07-27T17:30:00Z"
-        },
-        {
-            "id": "news-902",
-            "text": "Moder raid planned for Friday night.",
-            "timestamp": "2026-07-27T18:10:00Z"
-        }
-    ]
-    return {
-        "success": True,
-        "data": response
-    }
-
-@app.get('/api/servers/{server_name}/rules', status_code=200)
-def server_rules(server_name: str):
-    response = [
-        "Be respectful in shared areas.",
-        "Label portal destinations clearly.",
-        "Ask before modifying another player's build."
-    ]
-    return {
-        "success": True,
-        "data": response
-    }
-
-@app.get('/api/servers/{server_name}/logs', status_code=200)
-def server_logs(server_name: str, limit: int = 50):
-    response = [
-        "[19:01:21] World saved",
-        "[18:59:02] Player Maya joined",
-        "[18:43:17] Boss defeated"
-    ][:limit]
     return {
         "success": True,
         "data": response

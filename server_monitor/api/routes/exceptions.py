@@ -1,0 +1,2 @@
+class ServerNotFoundError(Exception):
+    pass

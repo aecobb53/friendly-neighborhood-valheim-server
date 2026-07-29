@@ -10,7 +10,7 @@
 .track {
   display: inline-flex;
   /* Pause on hover */
-  animation: scroll 40s linear infinite;
+  animation: scroll 70s linear infinite;
 }
 
 .feed:hover .track {
