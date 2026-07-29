@@ -8,8 +8,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-from .models import ServiceResponse
-
 DATA_DIR = Path("/app/storage")
 STATIC_CONTENT_DIR = Path("/app/static/content")
 SERVERS_DIR = STATIC_CONTENT_DIR / "servers"

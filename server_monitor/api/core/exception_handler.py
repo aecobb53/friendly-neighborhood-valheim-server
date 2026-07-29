@@ -3,7 +3,7 @@ import logging
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from .exceptions import (
+from common.exceptions import (
     ServerNotFoundError,
 )
 

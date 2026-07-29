@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 import logging
-from set_logger import set_logger
+from core.set_logger import set_logger
 set_logger()
 logger = logging.getLogger(__name__)
 
@@ -22,10 +22,10 @@ app = FastAPI()
 DATA_DIR = Path("/app/storage")
 SERVERS_DIR = Path("/app/servers")
 
-from routes.exceptions import ServerNotFoundError
+from common.exceptions import ServerNotFoundError
 
 from routes.servers.route import router as service_router
-from routes.exception_handler import server_not_found
+from core.exception_handler import server_not_found
 
 app.include_router(service_router)
 app.add_exception_handler(ServerNotFoundError, server_not_found)
