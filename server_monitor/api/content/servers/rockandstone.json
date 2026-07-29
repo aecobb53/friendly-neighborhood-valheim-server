@@ -3,5 +3,7 @@
   "game": "Valheim",
   "display_name": "RockandStone",
   "expected": true,
-  "description": "Main Valheim server"
+  "description": "Main Valheim server",
+  "news": [],
+  "rules": []
 }

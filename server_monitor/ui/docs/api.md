@@ -303,3 +303,7 @@ It should only know:
 * What error occurred if it failed.
 
 The backend owns everything else.
+
+# Date and time
+
+Date/time is returned from the backend in UTC. The UI should convert that to the local time for the browser

@@ -11,10 +11,18 @@ from common.exceptions import ServerNotFoundError
 logger = logging.getLogger(__name__)
 
 
-from .models import ServiceResponse
-# from common.models import ResponseObject
+from common.models import ResponseObject
 
-from common.utils import DATA_DIR, SERVERS_DIR, parse_timestamp, find_servers
+from common.utils import DATA_DIR, SERVERS_DIR, parse_timestamp, find_servers, find_game_servers, find_specific_server, find_game_info
+
+from .models import (
+    ContainerStatusEnum,
+    ServerStatusEnum,
+    BaseResponse,
+    ServerStatusServer,
+    ServerStatusGame,
+    GETServerStatusResponse,
+)
 
 router = APIRouter(
     prefix='/api',
@@ -23,24 +31,14 @@ router = APIRouter(
 
 
 @router.get('/server-status', status_code=200)
-def server_status() -> ServiceResponse:
-    response = {
-        "last_updated": datetime.now(timezone.utc),
-        "games": [],
-    }
+def server_status() -> ResponseObject:
 
-    servers_by_name = find_servers()
-    logger.debug(f"Found {len(servers_by_name)} unique servers.")
-    latest_servers = [server_list[-1] for server_list in servers_by_name.values() if server_list]
-    games = {}
 
-    for latest_server in latest_servers:
-        game_name = latest_server.get('game_name', 'Unknown')
-        if game_name not in games:
-            games[game_name] = []
-        games[game_name].append(latest_server)
+    # TODO this needs to look in the servers dir for servers that do not have active
+    # TODO map the outputs to the base model objects not just a dict
+    games = []
 
-    for game, game_servers in games.items():
+    for game, game_servers in find_game_servers().items():
         game_payload = {
             "name": game,
             "image": "SERVER IIMAGE",
@@ -49,18 +47,23 @@ def server_status() -> ServiceResponse:
         for server in game_servers:
             if not len(server['server_status_list']):
                 continue
-            current_status = server['server_status_list'][-1]
+            current_status = server['latest_status']
             game_payload['servers'].append({
                 "id": server['container_id'],
                 "name": server['server_name'],
                 "game": server.get('game_name', 'unknown'),
-                "container_status": server['container_status'],
+                "container_status": server['container_status'].upper(),
                 "server_status": current_status['status'],
                 "healthy": True,
                 "last_message": current_status['message'],
                 "updated": datetime.strptime(current_status['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ"),
             })
-        response['games'].append(game_payload)
+        games.append(game_payload)
+
+    response = GETServerStatusResponse(
+        last_updated=datetime.now(timezone.utc),
+        games=games,
+    )
 
     return {
         "success": True,
@@ -69,8 +72,7 @@ def server_status() -> ServiceResponse:
 
 
 @router.get('/server-info/{server_name}', status_code=200)
-def server_info(server_name: str):
-    response = {}
+def server_info(server_name: str) -> ResponseObject:
     for server in os.listdir(SERVERS_DIR):
         with open(SERVERS_DIR / server) as sf:
             server_info = json.load(sf)
@@ -78,16 +80,16 @@ def server_info(server_name: str):
                 break
     else:
         raise ServerNotFoundError(f"The server named {server_name} was not found")
-    print(f"Found server info for {server_name}: {server_info}")
-    response = {
-        "server_name": "valheim-main",
-        "display_name": "Hellheim",
-        "game": "Valheim",
-        "description": "Long-term cooperative world focused on exploration and builds.",
-        "container_status": "running",
-        "display_status": "ONLINE",
-        "timestamp": "2026-07-27T19:12:00Z",
-        "quick_info": {
+    server_info = find_game_info(server_name=server_name)
+    server = find_specific_server(server_name=server_name)
+    if server:
+        container_status = server['container_status']
+        display_status = server['latest_status']['status']
+        latest_timestamp = server['latest_status']['timestamp']
+        server_status_list = server['server_status_list']
+        quick_info = {}
+        """
+        quick_info = {
             "world": "Hellheim_02",
             "server_version": "0.219.14",
             "modpack_version": "bepinex-5.4.23",
@@ -96,18 +98,25 @@ def server_info(server_name: str):
             "max_players": 10,
             "time_zone": "UTC"
         },
-        "server_status_list": [
-            {
-                "status": "ONLINE",
-                "message": "Server started successfully",
-                "timestamp": "2026-07-27T12:00:12Z"
-            },
-            {
-                "status": "ONLINE",
-                "message": "World save complete",
-                "timestamp": "2026-07-27T18:45:03Z"
-            }
-        ]
+        """
+    else:
+        logger.warning(f"The server {server_name} does not have a history of running")
+        container_status = 'unknown'
+        display_status = 'UNKNOWN'
+        latest_timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        server_status_list = []
+        quick_info = {}
+
+    response = {
+        "server_name": server_info['server_name'],
+        "display_name": server_info['display_name'],
+        "game": server_info['game'],
+        "description": server_info['description'],
+        "container_status": container_status,
+        "display_status": display_status,
+        "timestamp": latest_timestamp,
+        "quick_info": quick_info,
+        "server_status_list": server_status_list
     }
     return {
         "success": True,
@@ -115,44 +124,35 @@ def server_info(server_name: str):
     }
 
 @router.get('/servers/{server_name}/news', status_code=200)
-def server_news(server_name: str):
-    response = [
-        {
-            "id": "news-901",
-            "text": "New mountain outpost completed near spawn.",
-            "timestamp": "2026-07-27T17:30:00Z"
-        },
-        {
-            "id": "news-902",
-            "text": "Moder raid planned for Friday night.",
-            "timestamp": "2026-07-27T18:10:00Z"
-        }
-    ]
+def server_news(server_name: str) -> ResponseObject:
+    server_info = find_game_info(server_name=server_name)
     return {
         "success": True,
-        "data": response
+        "data": server_info['news']
     }
 
 @router.get('/servers/{server_name}/rules', status_code=200)
-def server_rules(server_name: str):
-    response = [
-        "Be respectful in shared areas.",
-        "Label portal destinations clearly.",
-        "Ask before modifying another player's build."
-    ]
+def server_rules(server_name: str) -> ResponseObject:
+    server_info = find_game_info(server_name=server_name)
+    # response = [
+    #     "Be respectful in shared areas.",
+    #     "Label portal destinations clearly.",
+    #     "Ask before modifying another player's build."
+    # ]
     return {
         "success": True,
-        "data": response
+        "data": server_info['news']
     }
 
-@router.get('/servers/{server_name}/logs', status_code=200)
-def server_logs(server_name: str, limit: int = 50):
-    response = [
-        "[19:01:21] World saved",
-        "[18:59:02] Player Maya joined",
-        "[18:43:17] Boss defeated"
-    ][:limit]
-    return {
-        "success": True,
-        "data": response
-    }
+# @router.get('/servers/{server_name}/logs', status_code=200)
+# def server_logs(server_name: str, limit: int = 50):
+#     raise ValueError('This actually got run??')
+#     response = [
+#         "[19:01:21] World saved",
+#         "[18:59:02] Player Maya joined",
+#         "[18:43:17] Boss defeated"
+#     ][:limit]
+#     return {
+#         "success": True,
+#         "data": response
+#     }

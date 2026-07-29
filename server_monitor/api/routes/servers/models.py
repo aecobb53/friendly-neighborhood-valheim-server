@@ -50,6 +50,6 @@ class GETServerStatusResponse(BaseModel):
     games: list[ServerStatusGame]
 
 
-class ServiceResponse(BaseModel):
-    success: bool
-    data: Any | None = None
+# class ServiceResponse(BaseModel):
+#     success: bool
+#     data: Any | None = None

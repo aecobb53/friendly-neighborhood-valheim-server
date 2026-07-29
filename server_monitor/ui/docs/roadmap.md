@@ -75,11 +75,11 @@ If a task becomes too large, it should be divided into additional implementation
 
 Current Phase:
 
-**Phase 2**
+**Phase 3**
 
 Current Task:
 
-**Task 2.4 - Requests Page**
+**Task 3.1 - Event Card**
 
 # Phase 1 - Minimum Viable Community Hub
 
@@ -345,7 +345,7 @@ Reference:
 
 ## Task 2.4 - Requests Page
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 

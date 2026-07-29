@@ -103,6 +103,61 @@
   gap: 1rem;
 }
 
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  font: inherit;
+  font-size: 0.82rem;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.copyButton:hover {
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.copiedLabel {
+  color: #a7f3d0;
+  font-size: 0.8rem;
+}
+
+.filterBanner {
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 1rem;
+  padding: 0.75rem 1.1rem;
+  background: rgba(59, 130, 246, 0.08);
+  color: #bfdbfe;
+  font-size: 0.92rem;
+}
+
+.clearFilter {
+  background: transparent;
+  border: 0;
+  color: #93c5fd;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.clearFilter:hover {
+  color: #bfdbfe;
+}
+
 .emptyCard {
   display: flex;
   flex-direction: column;
