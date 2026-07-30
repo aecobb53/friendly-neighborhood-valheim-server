@@ -14,6 +14,7 @@ DATA_DIR = Path("/app/storage")
 CONTENT_DIR = Path("/app/content")
 SERVERS_DIR = CONTENT_DIR / "servers"
 REQUESTS_DIR = CONTENT_DIR / "requests"
+IMAGES_DIR = Path("/app/images")
 
 
 def parse_timestamp(timestamp: str) -> datetime:

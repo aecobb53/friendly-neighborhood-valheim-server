@@ -27,11 +27,16 @@ from common.exceptions import ServerNotFoundError
 
 from routes.servers.route import router as service_router
 from routes.requests.route import router as requests_router
+from routes.events.route import router as event_router
+from routes.gallery.route import gallery_router, map_router
 from core.exception_handler import server_not_found
 from common.utils import CONTENT_DIR
 
 app.include_router(service_router)
 app.include_router(requests_router)
+app.include_router(event_router)
+app.include_router(gallery_router)
+app.include_router(map_router)
 app.add_exception_handler(ServerNotFoundError, server_not_found)
 
 

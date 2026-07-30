@@ -1,0 +1,23 @@
+import json
+
+from datetime import datetime, date, time
+from pydantic import BaseModel
+
+
+class EventsQueryParams(BaseModel):
+    id: str | None = None
+    server: str | None = None
+
+
+class EventDataObject(BaseModel):
+    id: str
+    server: str
+    title: str
+    description: str
+    event_date: date | None = None
+    start_time: time | None = None
+    end_time: time | None = None
+    meetup_location: str | None = None
+    expanded_details: str | None = None
+    image_url: str | None = None
+    created_at: datetime | None = None

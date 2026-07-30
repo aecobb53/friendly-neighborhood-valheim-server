@@ -79,7 +79,7 @@ Current Phase:
 
 Current Task:
 
-**Task 3.1 - Event Card**
+**Task 3.5 - Maps Page**
 
 # Phase 1 - Minimum Viable Community Hub
 
@@ -376,7 +376,7 @@ At the completion of this phase users should be able to:
 
 ## Task 3.1 - Event Card
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: XS
 
@@ -388,7 +388,7 @@ Reference:
 
 ## Task 3.2 - Gallery Card
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: XS
 
@@ -400,7 +400,7 @@ Reference:
 
 ## Task 3.3 - Events Page
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 
@@ -416,7 +416,7 @@ Reference:
 
 ## Task 3.4 - Gallery Page
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 
