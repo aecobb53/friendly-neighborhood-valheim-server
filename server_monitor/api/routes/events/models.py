@@ -21,6 +21,8 @@ class EventDataObject(BaseModel):
     expanded_details: str | None = None
     image_url: str | None = None
     created_at: datetime | None = None
+    updated_at: datetime | None = None
+    changelog: list[str] = []
 
     @property
     def to_json(self):

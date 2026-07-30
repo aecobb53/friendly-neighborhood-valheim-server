@@ -9,5 +9,7 @@
     "meetup_location": "Castle Base",
     "expanded_details": "Reviving the game and we want to figure out whats next. We want to take on Fader at some point, make sure everybody has a room in the Castle, and anything else we want to explore!",
     "image_url": "/static/images/Valheim.png",
-    "created_at": "2026-07-29T14:30:00Z"
+    "created_at": "2026-07-29T14:30:00Z",
+    "updated_at": null,
+    "changelog": []
 }

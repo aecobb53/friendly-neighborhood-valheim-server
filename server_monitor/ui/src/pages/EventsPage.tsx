@@ -43,6 +43,19 @@ function createEmptyForm(server = ''): CreateEventForm {
   };
 }
 
+function createFormFromEvent(event: EventItem, fallbackServer = ''): CreateEventForm {
+  return {
+    server: event.server || fallbackServer,
+    title: event.title,
+    description: event.description,
+    event_date: event.event_date ?? '',
+    start_time: event.start_time ? event.start_time.slice(0, 5) : '',
+    end_time: event.end_time ? event.end_time.slice(0, 5) : '',
+    meetup_location: event.meetup_location ?? '',
+    expanded_details: event.expanded_details ?? '',
+  };
+}
+
 const FALLBACK_EVENTS: EventItem[] = [
   {
     id: 'evt-sample-1',
@@ -71,6 +84,7 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateEventForm>(createEmptyForm());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -87,6 +101,26 @@ export default function EventsPage() {
   function openDetail(event: EventItem) {
     setSelectedEvent(event);
     setDetailsExpanded(false);
+  }
+
+  function openCreateModal() {
+    setEditingEventId(null);
+    setForm(createEmptyForm(availableServers[0] ?? ''));
+    setFeedback(null);
+    setShowCreate(true);
+  }
+
+  function openEditModal(event: EventItem) {
+    setEditingEventId(event.id);
+    setForm(createFormFromEvent(event, availableServers[0] ?? ''));
+    setFeedback(null);
+    setShowCreate(true);
+  }
+
+  function closeCreateModal() {
+    setShowCreate(false);
+    setEditingEventId(null);
+    setForm(createEmptyForm(availableServers[0] ?? ''));
   }
 
   function closeDetail() {
@@ -180,8 +214,7 @@ export default function EventsPage() {
       return;
     }
 
-    const newEvent: EventItem = {
-      id: `local-${Date.now()}`,
+    const baseEvent = {
       server: form.server,
       title,
       description,
@@ -191,10 +224,15 @@ export default function EventsPage() {
       meetup_location: form.meetup_location.trim() || null,
       expanded_details: form.expanded_details.trim() || null,
       image_url: null,
-      created_at: new Date().toISOString(),
     };
 
-    const response = await api.post<{ data?: Partial<EventItem> } | Partial<EventItem>>('/events', newEvent);
+    const payload = editingEventId
+      ? { id: editingEventId, ...baseEvent }
+      : { ...baseEvent };
+
+    const response = editingEventId
+      ? await api.put<{ data?: Partial<EventItem> } | Partial<EventItem>>(`/events/${editingEventId}`, payload)
+      : await api.post<{ data?: Partial<EventItem> } | Partial<EventItem>>('/events', payload);
 
     if (!response.success) {
       setFeedback(response.error.message);
@@ -202,12 +240,28 @@ export default function EventsPage() {
     }
 
     const created = (response.data as { data?: Partial<EventItem> })?.data ?? (response.data as Partial<EventItem>);
-    const finalEvent: EventItem = created?.id ? { ...newEvent, ...created } as EventItem : newEvent;
+    const existingEvent = events.find((event) => event.id === editingEventId);
+    const finalEvent: EventItem = editingEventId
+      ? {
+          ...(existingEvent ?? { id: editingEventId, created_at: new Date().toISOString() }),
+          ...baseEvent,
+          id: editingEventId,
+          ...(created as Partial<EventItem>),
+        } as EventItem
+      : {
+          id: `local-${Date.now()}`,
+          created_at: new Date().toISOString(),
+          ...baseEvent,
+          ...(created as Partial<EventItem>),
+        } as EventItem;
 
-    setEvents((current) => [finalEvent, ...current]);
+    setEvents((current) => editingEventId
+      ? current.map((event) => (event.id === editingEventId ? finalEvent : event))
+      : [finalEvent, ...current]);
     setForm(createEmptyForm(availableServers[0] ?? ''));
-    setFeedback('Your event has been added.');
+    setFeedback(editingEventId ? 'Your event has been updated.' : 'Your event has been added.');
     setShowCreate(false);
+    setEditingEventId(null);
   }
 
   return (
@@ -218,7 +272,7 @@ export default function EventsPage() {
       />
 
       <div className={styles.toolbar}>
-        <Button onClick={() => setShowCreate(true)}>Create Event</Button>
+        <Button onClick={openCreateModal}>Create Event</Button>
       </div>
 
       {feedback && <p className={styles.feedback}>{feedback}</p>}
@@ -229,7 +283,7 @@ export default function EventsPage() {
         <Card className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>No upcoming events are currently scheduled.</h2>
           <p className={styles.emptyText}>Be the first to organize the next adventure!</p>
-          <Button onClick={() => setShowCreate(true)}>Create an event</Button>
+          <Button onClick={openCreateModal}>Create an event</Button>
         </Card>
       ) : (
         <div className={styles.list}>
@@ -239,6 +293,7 @@ export default function EventsPage() {
               event={event}
               onOpen={() => openDetail(event)}
               onCopyLink={() => copyLink(event.id)}
+              onEdit={() => openEditModal(event)}
               copied={copiedId === event.id}
             />
           ))}
@@ -302,15 +357,15 @@ export default function EventsPage() {
 
       {/* Create Modal */}
       {showCreate && (
-        <div className={styles.overlay} role="presentation" onClick={() => setShowCreate(false)}>
+        <div className={styles.overlay} role="presentation" onClick={closeCreateModal}>
           <div className={styles.modal} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Create Event</h2>
+              <h2 className={styles.modalTitle}>{editingEventId ? 'Edit Event' : 'Create Event'}</h2>
               <button
                 className={styles.closeButton}
                 type="button"
-                onClick={() => setShowCreate(false)}
-                aria-label="Close create event form"
+                onClick={closeCreateModal}
+                aria-label={editingEventId ? 'Close edit event form' : 'Close create event form'}
               >
                 ×
               </button>
@@ -400,8 +455,8 @@ export default function EventsPage() {
               </label>
 
               <div className={styles.modalActions}>
-                <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
-                <Button type="submit">Create Event</Button>
+                <Button type="button" variant="ghost" onClick={closeCreateModal}>Cancel</Button>
+                <Button type="submit">{editingEventId ? 'Save changes' : 'Create Event'}</Button>
               </div>
             </form>
           </div>

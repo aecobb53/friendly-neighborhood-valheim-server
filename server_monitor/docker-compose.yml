@@ -14,6 +14,7 @@ services:
       - ./shared/states:/app/storage:ro
       - ./api/content:/app/content
       - ./tmp_images:/app/images
+      - /srv2t/server_monitor:/app/images
     ports:
       - "8208:8000"
     labels:
