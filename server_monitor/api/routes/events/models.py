@@ -21,3 +21,13 @@ class EventDataObject(BaseModel):
     expanded_details: str | None = None
     image_url: str | None = None
     created_at: datetime | None = None
+
+    @property
+    def to_json(self):
+        response = json.loads(self.model_dump_json())
+        return response
+
+    @classmethod
+    def from_json(cls, data_object):
+        obj = cls(**data_object)
+        return obj

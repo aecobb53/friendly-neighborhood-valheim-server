@@ -29,21 +29,12 @@ map_router = APIRouter(
 
 @gallery_router.get('', status_code=200)
 def gallery(query: Annotated[GalleryQueryParams, Depends()]) -> ResponseObject:
-    # response = find_requests(query=query)
-    response = [{
-      "id": "gal-001",
-      "server": "valheim-main",
-      "title": "Castle Complete",
-      "description": "We finally finished the main hall.",
-      "media_count": 3,
-      "preview_url": "/api/gallery/gal-001/media/0",
-      "media_urls": [
-        "/api/gallery/gal-001/media/0",
-        "/api/gallery/gal-001/media/1",
-        "/api/gallery/gal-001/media/2"
-      ],
-      "created_at": "2026-07-28T20:15:00Z"
-    }]
+    response = []
+    for fl in (IMAGES_DIR / "manifest_files").glob("*gal-*.json"):
+        with open(fl, "r") as f:
+            print(f"READING FILE: {fl}")
+            data = json.load(f)
+            response.append(data)
     return {
         "success": True,
         "data": response
@@ -56,9 +47,9 @@ def create_gallery(new_resource: GalleryDataObject) -> ResponseObject:
         "data": new_resource
     }
 
-@gallery_router.get('/{id}/media/{index}', status_code=200)
-def gallery_item(id: str, index: int) -> ResponseObject:
-    image_path = Path(IMAGES_DIR) / f"{id}.png"
+@gallery_router.get('/{id}/media/{filename}', status_code=200)
+def gallery_item(id: str, filename: str) -> ResponseObject:
+    image_path = Path(IMAGES_DIR) / "gallery" / f"{filename}.png"
     if not image_path.exists():
         raise HTTPException(status_code=404, detail="Image not found")
 
@@ -68,31 +59,21 @@ def gallery_item(id: str, index: int) -> ResponseObject:
         filename=image_path.name,
     )
 
-
 @map_router.get('/{server}', status_code=200)
 def map(server: str) -> ResponseObject:
-    # response = find_requests(query=query)
-    response = {
-      "server": "valheim-main",
-      "description": "This community map highlights major bases, portals, resource farms, and other important locations. Updated periodically as the world evolves.",
-      "last_updated": "2026-07-29T00:00:00Z",
-      "image_url": "/api/maps/valheim-main/image",
-      "legend": [
-        { "symbol": "🏠", "label": "Main Base" },
-        { "symbol": "⚔", "label": "Boss" },
-        { "symbol": "🛖", "label": "Outpost" },
-        { "symbol": "⛵", "label": "Harbor" },
-        { "symbol": "🌾", "label": "Farm" }
-      ]
-    }
+    manifest_path = Path(IMAGES_DIR) / "manifest_files" / f"{server}.map.json"
+    if not manifest_path.exists():
+        raise HTTPException(status_code=404, detail="Map manifest not found")
+    with open(manifest_path) as mf:
+        manifest_content = json.load(mf)
     return {
         "success": True,
-        "data": response
+        "data": manifest_content
     }
 
-@gallery_router.get('/{server}/image', status_code=200)
+@map_router.get('/{server}/image', status_code=200)
 def map_item(server: str) -> ResponseObject:
-    image_path = Path(IMAGES_DIR) / f"{server}.png"
+    image_path = Path(IMAGES_DIR) / "maps" / f"{server}.png"
     if not image_path.exists():
         raise HTTPException(status_code=404, detail="Image not found")
 

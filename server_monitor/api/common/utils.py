@@ -14,6 +14,7 @@ DATA_DIR = Path("/app/storage")
 CONTENT_DIR = Path("/app/content")
 SERVERS_DIR = CONTENT_DIR / "servers"
 REQUESTS_DIR = CONTENT_DIR / "requests"
+EVENTS_DIR = CONTENT_DIR / "events"
 IMAGES_DIR = Path("/app/images")
 
 
@@ -44,10 +45,14 @@ def find_game_servers():
     servers = find_servers()
     games = {}
     for server_list in servers.values():
-        if not server_list:
+        if not len(server_list):
             continue
         latest_server = server_list[-1]
-        latest_server['latest_status'] = latest_server.get('server_status_list', [{}])[-1]
+        status_list = latest_server.get('server_status_list')
+        if status_list:
+            latest_server['latest_status'] = status_list[-1]
+        else:
+            latest_server['latest_status'] = {}
         game_name = latest_server.get('game_name', 'Unknown')
         if game_name not in games:
             games[game_name] = []

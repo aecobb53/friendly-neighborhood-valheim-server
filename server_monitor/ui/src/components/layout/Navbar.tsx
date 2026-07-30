@@ -4,6 +4,7 @@ import styles from './Navbar.module.css';
 const CENTER_LINKS = [
   { to: '/events', label: 'Events' },
   { to: '/gallery', label: 'Gallery' },
+  { to: '/maps', label: 'Maps' },
   { to: '/requests', label: 'Requests' },
 ];
 

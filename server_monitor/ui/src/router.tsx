@@ -7,6 +7,7 @@ import ServerOverviewPage from '@/pages/ServerOverviewPage';
 import RequestsPage from '@/pages/RequestsPage';
 import EventsPage from '@/pages/EventsPage';
 import GalleryPage from '@/pages/GalleryPage';
+import MapsPage from '@/pages/MapsPage';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
       { path: 'requests', element: <RequestsPage /> },
       { path: 'events', element: <EventsPage /> },
       { path: 'gallery', element: <GalleryPage /> },
-      // Task 2.3: Server Overview (placeholder registered now for ServerCard links)
+      { path: 'maps', element: <MapsPage /> },
       { path: 'servers/:name', element: <ServerOverviewPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

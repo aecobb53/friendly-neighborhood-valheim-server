@@ -122,6 +122,7 @@ export default function ServerOverviewPage() {
     return [
       { label: 'Events', to: `/events?${serverFilter}` },
       { label: 'Gallery', to: `/gallery?${serverFilter}` },
+      { label: 'Maps', to: `/maps?${serverFilter}` },
       { label: 'Requests', to: `/requests?${serverFilter}` },
     ];
   }, [server]);

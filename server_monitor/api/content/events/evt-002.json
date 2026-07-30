@@ -1,0 +1,13 @@
+{
+    "id": "evt-002",
+    "server": "RockandStone",
+    "title": "Fighting Fader",
+    "description": "The Ashlands boss!",
+    "event_date": null,
+    "start_time": null,
+    "end_time": null,
+    "meetup_location": "Castle Base",
+    "expanded_details": "The next boss is Fader, lets goooo!",
+    "image_url": "/api/gallery/gal-007/media/Fader",
+    "created_at": "2026-07-29T14:30:00Z"
+}

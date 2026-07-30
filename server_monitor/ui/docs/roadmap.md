@@ -75,11 +75,11 @@ If a task becomes too large, it should be divided into additional implementation
 
 Current Phase:
 
-**Phase 3**
+**Phase 4**
 
 Current Task:
 
-**Task 3.5 - Maps Page**
+**Task 4.1 - Authentication**
 
 # Phase 1 - Minimum Viable Community Hub
 
@@ -432,7 +432,7 @@ Reference:
 
 ## Task 3.5 - Maps Page
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: S
 
