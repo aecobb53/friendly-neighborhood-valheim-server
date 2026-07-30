@@ -49,6 +49,16 @@ function createEmptyForm(server = ''): CreateRequestForm {
   };
 }
 
+function createFormFromRequest(request: RequestItem, fallbackServer = ''): CreateRequestForm {
+  return {
+    server: request.server || fallbackServer,
+    title: request.title,
+    requested_by: request.requested_by,
+    urgency: request.urgency,
+    description: request.description,
+  };
+}
+
 const FALLBACK_REQUESTS: RequestItem[] = [
   {
     id: 'sample-1',
@@ -131,6 +141,7 @@ export default function RequestsPage() {
   const [availableServers, setAvailableServers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingRequestId, setEditingRequestId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateRequestForm>(createEmptyForm());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -143,12 +154,22 @@ export default function RequestsPage() {
     });
   }
 
+  function resetCreateModal() {
+    setShowCreateModal(false);
+    setEditingRequestId(null);
+    setForm(createEmptyForm(availableServers[0] ?? ''));
+  }
+
   function openCreateModal() {
     const defaultServer = availableServers[0] ?? '';
-    setForm((current) => ({
-      ...current,
-      server: current.server || defaultServer,
-    }));
+    setEditingRequestId(null);
+    setForm(createEmptyForm(defaultServer));
+    setShowCreateModal(true);
+  }
+
+  function openEditModal(request: RequestItem) {
+    setEditingRequestId(request.id);
+    setForm(createFormFromRequest(request, availableServers[0] ?? ''));
     setShowCreateModal(true);
   }
 
@@ -225,23 +246,30 @@ export default function RequestsPage() {
       return;
     }
 
-    const newRequest: RequestItem = {
-      id: `local-${Date.now()}`,
+    const existingRequest = editingRequestId ? requests.find((item) => item.id === editingRequestId) : null;
+    const nextRequest: RequestItem = {
+      id: editingRequestId ?? `local-${Date.now()}`,
       server: form.server,
       title,
       requested_by: requestedBy,
       urgency: form.urgency,
       description,
-      created_at: new Date().toISOString(),
-      completed: false,
-      archived: false,
+      created_at: existingRequest?.created_at ?? new Date().toISOString(),
+      completed: existingRequest?.completed ?? false,
+      archived: existingRequest?.archived ?? false,
     };
 
-    const response = await api.post<{ data?: Partial<RequestItem> & { urgency?: unknown } } | (Partial<RequestItem> & { urgency?: unknown })>('/requests', {
-      ...newRequest,
-      urgency: toApiUrgency(newRequest.urgency),
-      image: null,
-    });
+    const response = editingRequestId
+      ? await api.put<{ data?: Partial<RequestItem> & { urgency?: unknown } } | (Partial<RequestItem> & { urgency?: unknown })>(`/requests/${editingRequestId}`, {
+          ...nextRequest,
+          urgency: toApiUrgency(nextRequest.urgency),
+          image: null,
+        })
+      : await api.post<{ data?: Partial<RequestItem> & { urgency?: unknown } } | (Partial<RequestItem> & { urgency?: unknown })>('/requests', {
+          ...nextRequest,
+          urgency: toApiUrgency(nextRequest.urgency),
+          image: null,
+        });
 
     if (!response.success) {
       setFeedback(response.error.message);
@@ -249,12 +277,15 @@ export default function RequestsPage() {
     }
 
     const createdFromApi = (response.data as { data?: Partial<RequestItem> & { urgency?: unknown } })?.data ?? (response.data as Partial<RequestItem> & { urgency?: unknown });
-    const createdRequest = createdFromApi ? normalizeRequest(createdFromApi, newRequest) : newRequest;
+    const createdRequest = createdFromApi ? normalizeRequest(createdFromApi, nextRequest) : nextRequest;
 
-    setRequests((current) => [createdRequest, ...current]);
+    setRequests((current) => editingRequestId
+      ? current.map((item) => (item.id === editingRequestId ? createdRequest : item))
+      : [createdRequest, ...current]);
     setForm(createEmptyForm(availableServers[0] ?? ''));
-    setFeedback('Your request has been added to the board.');
+    setFeedback(editingRequestId ? 'Your request has been updated.' : 'Your request has been added to the board.');
     setShowCreateModal(false);
+    setEditingRequestId(null);
   }
 
   async function toggleCompletion(request: RequestItem) {
@@ -348,7 +379,22 @@ export default function RequestsPage() {
                   <button
                     type="button"
                     className={styles.copyButton}
-                    onClick={() => copyLink(request.id)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openEditModal(request);
+                    }}
+                    aria-label="Edit this request"
+                    title="Edit request"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.copyButton}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      copyLink(request.id);
+                    }}
                     aria-label="Copy link to this request"
                     title={copiedId === request.id ? 'Copied!' : 'Copy link'}
                   >
@@ -371,11 +417,11 @@ export default function RequestsPage() {
       )}
 
       {showCreateModal && (
-        <div className={styles.overlay} role="presentation" onClick={() => setShowCreateModal(false)}>
+        <div className={styles.overlay} role="presentation" onClick={resetCreateModal}>
           <div className={styles.modal} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>Create Request</h2>
-              <button className={styles.closeButton} type="button" onClick={() => setShowCreateModal(false)} aria-label="Close request form">
+              <h2 className={styles.modalTitle}>{editingRequestId ? 'Edit Request' : 'Create Request'}</h2>
+              <button className={styles.closeButton} type="button" onClick={resetCreateModal} aria-label={editingRequestId ? 'Close edit request form' : 'Close request form'}>
                 ×
               </button>
             </div>
@@ -439,8 +485,8 @@ export default function RequestsPage() {
               </label>
 
               <div className={styles.modalActions}>
-                <Button type="button" variant="ghost" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-                <Button type="submit">Create Request</Button>
+                <Button type="button" variant="ghost" onClick={resetCreateModal}>Cancel</Button>
+                <Button type="submit">{editingRequestId ? 'Save Changes' : 'Create Request'}</Button>
               </div>
             </form>
           </div>

@@ -78,6 +78,8 @@ Selecting the button opens a modal used to create a new event.
 
 The creation workflow should remain intentionally simple.
 
+Existing events should also be editable from the event card. A small pencil action should open the same modal, prefilled with the current event details so the user can update the information in place.
+
 Required fields:
 
 * Server
@@ -151,6 +153,8 @@ Optional:
 * Expanded Details
 
 The image should remain visually important without overwhelming the card.
+
+Each card should also include lightweight actions for sharing and editing. The edit action should be represented by a pencil icon and should open the same form used for creating an event.
 
 ---
 

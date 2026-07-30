@@ -504,3 +504,22 @@ When an implementation task is completed:
 * Commit the work if appropriate.
 
 The project should always remain in a deployable state.
+
+# Upcoming ideas
+
+Polls
+    add who is playing tonight and could even check off who is on or hopped on
+maybe even a timeline of who is hopping on when or available when. Like a timeline view of availability
+Guides and how to with easy links. Like a community wiki
+optomize for mobile
+
+# Current things I notice could be fixed up
+the feed should filter by game
+the carousel should filter by page as well
+Im prove the log messaging
+touch up server rules
+actually implement Recent news on server page
+links between page content like events to requests etc.
+external links for pages
+
+

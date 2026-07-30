@@ -98,6 +98,8 @@ Selecting the button opens a modal used to create a new request.
 
 The creation workflow should remain intentionally simple.
 
+Existing requests should also be editable from the request card. A small pencil action should open the same modal, prefilled with the current request details so the user can update the information in place.
+
 Required fields:
 
 * Server
@@ -154,6 +156,8 @@ Optional
 The description should preserve user-entered line breaks.
 
 Markdown is intentionally **not** supported in the initial implementation.
+
+Each card should also include lightweight actions for sharing and editing. The edit action should be represented by a pencil icon and should open the same form used for creating a request.
 
 ---
 
@@ -298,7 +302,6 @@ When implementing the Requests page:
 * Keep request creation simple.
 * Preserve line breaks within request descriptions.
 * Do not render Markdown.
-* Do not implement editing.
 * Do not implement completion workflows.
 * Do not duplicate Discord discussion features.
 * Preserve backend-provided ordering and filtering.
