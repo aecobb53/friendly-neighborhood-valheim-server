@@ -61,6 +61,41 @@
   font-size: 0.88rem;
 }
 
+.quickLinksSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.quickLinksTitle {
+  margin: 0;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+}
+
+.linkGrid {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.linkCard {
+  display: block;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.7rem;
+  color: #e5e7eb;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.88rem;
+}
+
+.linkCard:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f4f4f5;
+}
+
 .footer {
   margin-top: auto;
   padding-top: 0.4rem;

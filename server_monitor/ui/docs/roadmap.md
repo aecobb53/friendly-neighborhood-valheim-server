@@ -521,5 +521,15 @@ touch up server rules
 actually implement Recent news on server page
 links between page content like events to requests etc.
 external links for pages
+Response order of some stuff could be better like events baesd on time, requests by urgency
 
+# Completed updates
 
+2026-07-30
+Added optional quick links to Events and Requests cards with matching Server Quick Links visual style.
+
+Implemented behavior:
+* Quick links are only shown when one or more links exist.
+* Event and Request create/edit forms support adding multiple quick links.
+* Each quick link stores a display label and URL.
+* Quick links support internal paths and external URLs.

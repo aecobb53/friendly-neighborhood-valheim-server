@@ -16,6 +16,11 @@ class RequestDataUrgency(Enum):
     SOON = 'SOON'
     WHENEVER = 'WHENEVER'
 
+
+class QuickLinkDataObject(BaseModel):
+    display: str
+    url: str
+
 class RequestDataObject(BaseModel):
     id: str
     server: str
@@ -24,9 +29,12 @@ class RequestDataObject(BaseModel):
     urgency: RequestDataUrgency
     description: str
     image: str | None = None  # Path to an image
+    quick_links: list[QuickLinkDataObject] = []
     created_at: datetime
     completed: bool
     archived: bool
+    updated_at: datetime | None = None
+    changelog: list[str] = []
 
     @property
     def to_json(self):

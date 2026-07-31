@@ -7,6 +7,11 @@ import type { EventItem } from '@/components/ui/EventCard';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import styles from './EventsPage.module.css';
 
+interface QuickLinkInput {
+  display: string;
+  url: string;
+}
+
 interface CreateEventForm {
   server: string;
   title: string;
@@ -16,6 +21,7 @@ interface CreateEventForm {
   end_time: string;
   meetup_location: string;
   expanded_details: string;
+  quick_links: QuickLinkInput[];
 }
 
 interface ServerSummary {
@@ -40,7 +46,37 @@ function createEmptyForm(server = ''): CreateEventForm {
     end_time: '',
     meetup_location: '',
     expanded_details: '',
+    quick_links: [],
   };
+}
+
+function createFormQuickLinks(event: EventItem): QuickLinkInput[] {
+  return (event.quick_links ?? []).map((link) => ({
+    display: link.display,
+    url: link.url,
+  }));
+}
+
+function normalizeQuickLinkUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.startsWith('/') || /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
+}
+
+function toEventQuickLinks(links: QuickLinkInput[]): EventItem['quick_links'] {
+  return links
+    .map((link) => ({
+      display: link.display.trim(),
+      url: normalizeQuickLinkUrl(link.url),
+    }))
+    .filter((link) => link.display.length > 0 && link.url.length > 0);
 }
 
 function createFormFromEvent(event: EventItem, fallbackServer = ''): CreateEventForm {
@@ -53,6 +89,7 @@ function createFormFromEvent(event: EventItem, fallbackServer = ''): CreateEvent
     end_time: event.end_time ? event.end_time.slice(0, 5) : '',
     meetup_location: event.meetup_location ?? '',
     expanded_details: event.expanded_details ?? '',
+    quick_links: createFormQuickLinks(event),
   };
 }
 
@@ -68,6 +105,9 @@ const FALLBACK_EVENTS: EventItem[] = [
     meetup_location: 'Main Base Portal',
     expanded_details: 'Bring food and potions.\nWe will gather at the portal at 8 PM.',
     image_url: null,
+    quick_links: [
+      { display: 'Build Plan', url: 'https://example.com/friday-plan' },
+    ],
     created_at: '2026-07-29T14:30:00Z',
   },
 ];
@@ -100,7 +140,7 @@ export default function EventsPage() {
 
   function openDetail(event: EventItem) {
     setSelectedEvent(event);
-    setDetailsExpanded(false);
+    setDetailsExpanded(true);
   }
 
   function openCreateModal() {
@@ -121,6 +161,27 @@ export default function EventsPage() {
     setShowCreate(false);
     setEditingEventId(null);
     setForm(createEmptyForm(availableServers[0] ?? ''));
+  }
+
+  function addQuickLinkField() {
+    setForm((current) => ({
+      ...current,
+      quick_links: [...current.quick_links, { display: '', url: '' }],
+    }));
+  }
+
+  function updateQuickLinkField(index: number, field: keyof QuickLinkInput, value: string) {
+    setForm((current) => ({
+      ...current,
+      quick_links: current.quick_links.map((link, i) => (i === index ? { ...link, [field]: value } : link)),
+    }));
+  }
+
+  function removeQuickLinkField(index: number) {
+    setForm((current) => ({
+      ...current,
+      quick_links: current.quick_links.filter((_, i) => i !== index),
+    }));
   }
 
   function closeDetail() {
@@ -208,6 +269,7 @@ export default function EventsPage() {
 
     const title = form.title.trim();
     const description = form.description.trim();
+    const quickLinks = toEventQuickLinks(form.quick_links);
 
     if (!form.server || !title || !description) {
       setFeedback('Please choose a server and fill in the title and description.');
@@ -224,6 +286,7 @@ export default function EventsPage() {
       meetup_location: form.meetup_location.trim() || null,
       expanded_details: form.expanded_details.trim() || null,
       image_url: null,
+      quick_links: quickLinks,
     };
 
     const payload = editingEventId
@@ -335,6 +398,23 @@ export default function EventsPage() {
             </div>
 
             <p className={styles.detailDescription}>{selectedEvent.description}</p>
+
+            {(selectedEvent.quick_links ?? []).length > 0 && (
+              <div className={styles.quickLinksSection}>
+                <h3 className={styles.quickLinksTitle}>Quick Links</h3>
+                <div className={styles.quickLinksGrid}>
+                  {(selectedEvent.quick_links ?? []).map((link) => (
+                    <a
+                      key={`${selectedEvent.id}-${link.display}-${link.url}`}
+                      href={link.url}
+                      className={styles.quickLinkCard}
+                    >
+                      {link.display}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {selectedEvent.expanded_details && (
               <div className={styles.expandedSection}>
@@ -453,6 +533,31 @@ export default function EventsPage() {
                   placeholder="What to bring, strategy notes, preparation info…"
                 />
               </label>
+
+              <div className={styles.field}>
+                <div className={styles.quickLinksHeader}>
+                  <span>Quick Links <span className={styles.optional}>(optional)</span></span>
+                  <Button type="button" variant="ghost" size="sm" onClick={addQuickLinkField}>Add Link</Button>
+                </div>
+                {form.quick_links.length === 0 && (
+                  <p className={styles.quickLinksHint}>No quick links added. Add display text and a URL to show this section.</p>
+                )}
+                {form.quick_links.map((link, index) => (
+                  <div key={`event-quick-link-${index}`} className={styles.quickLinkRow}>
+                    <input
+                      value={link.display}
+                      onChange={(e) => updateQuickLinkField(index, 'display', e.target.value)}
+                      placeholder="Display text"
+                    />
+                    <input
+                      value={link.url}
+                      onChange={(e) => updateQuickLinkField(index, 'url', e.target.value)}
+                      placeholder="https://example.com"
+                    />
+                    <Button type="button" variant="ghost" size="sm" onClick={() => removeQuickLinkField(index)}>Remove</Button>
+                  </div>
+                ))}
+              </div>
 
               <div className={styles.modalActions}>
                 <Button type="button" variant="ghost" onClick={closeCreateModal}>Cancel</Button>

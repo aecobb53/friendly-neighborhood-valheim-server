@@ -9,6 +9,11 @@ class EventsQueryParams(BaseModel):
     server: str | None = None
 
 
+class QuickLinkDataObject(BaseModel):
+    display: str
+    url: str
+
+
 class EventDataObject(BaseModel):
     id: str
     server: str
@@ -20,6 +25,7 @@ class EventDataObject(BaseModel):
     meetup_location: str | None = None
     expanded_details: str | None = None
     image_url: str | None = None
+    quick_links: list[QuickLinkDataObject] = []
     created_at: datetime | None = None
     updated_at: datetime | None = None
     changelog: list[str] = []

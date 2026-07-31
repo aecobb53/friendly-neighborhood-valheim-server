@@ -12,9 +12,20 @@ interface RequestItem {
   requested_by: string;
   urgency: 'Whenever' | 'Soon' | 'Urgent';
   description: string;
+  quick_links?: RequestQuickLink[];
   created_at: string;
   completed?: boolean;
   archived?: boolean;
+}
+
+interface RequestQuickLink {
+  display: string;
+  url: string;
+}
+
+interface QuickLinkInput {
+  display: string;
+  url: string;
 }
 
 interface CreateRequestForm {
@@ -23,6 +34,7 @@ interface CreateRequestForm {
   requested_by: string;
   urgency: RequestItem['urgency'];
   description: string;
+  quick_links: QuickLinkInput[];
 }
 
 interface ServerSummary {
@@ -46,7 +58,37 @@ function createEmptyForm(server = ''): CreateRequestForm {
     requested_by: '',
     urgency: 'Whenever',
     description: '',
+    quick_links: [],
   };
+}
+
+function createFormQuickLinks(request: RequestItem): QuickLinkInput[] {
+  return (request.quick_links ?? []).map((link) => ({
+    display: link.display,
+    url: link.url,
+  }));
+}
+
+function normalizeQuickLinkUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.startsWith('/') || /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
+}
+
+function toRequestQuickLinks(links: QuickLinkInput[]): RequestQuickLink[] {
+  return links
+    .map((link) => ({
+      display: link.display.trim(),
+      url: normalizeQuickLinkUrl(link.url),
+    }))
+    .filter((link) => link.display.length > 0 && link.url.length > 0);
 }
 
 function createFormFromRequest(request: RequestItem, fallbackServer = ''): CreateRequestForm {
@@ -56,6 +98,7 @@ function createFormFromRequest(request: RequestItem, fallbackServer = ''): Creat
     requested_by: request.requested_by,
     urgency: request.urgency,
     description: request.description,
+    quick_links: createFormQuickLinks(request),
   };
 }
 
@@ -67,6 +110,9 @@ const FALLBACK_REQUESTS: RequestItem[] = [
     requested_by: 'Alex',
     urgency: 'Soon',
     description: 'We should host a shared raid night this weekend and rotate who leads the event.',
+    quick_links: [
+      { display: 'Sign Up Board', url: 'https://example.com/raid-night' },
+    ],
     created_at: '2026-07-27T18:00:00Z',
     completed: false,
   },
@@ -77,6 +123,7 @@ const FALLBACK_REQUESTS: RequestItem[] = [
     requested_by: 'Maya',
     urgency: 'Whenever',
     description: 'A few quality-of-life upgrades would make the server feel more welcoming for new players.',
+    quick_links: [],
     created_at: '2026-07-27T17:30:00Z',
     completed: true,
   },
@@ -119,6 +166,14 @@ function normalizeRequest(raw: Partial<RequestItem> & { urgency?: unknown }, fal
     description: String(raw.description ?? fallback.description),
     created_at: String(raw.created_at ?? fallback.created_at),
     urgency: toUiUrgency(raw.urgency ?? fallback.urgency),
+    quick_links: Array.isArray(raw.quick_links)
+      ? raw.quick_links
+          .map((link) => ({
+            display: typeof link?.display === 'string' ? link.display : '',
+            url: typeof link?.url === 'string' ? link.url : '',
+          }))
+          .filter((link) => link.display.length > 0 && link.url.length > 0)
+      : fallback.quick_links,
     completed: raw.completed ?? fallback.completed,
     archived: raw.archived ?? fallback.archived,
   };
@@ -171,6 +226,27 @@ export default function RequestsPage() {
     setEditingRequestId(request.id);
     setForm(createFormFromRequest(request, availableServers[0] ?? ''));
     setShowCreateModal(true);
+  }
+
+  function addQuickLinkField() {
+    setForm((current) => ({
+      ...current,
+      quick_links: [...current.quick_links, { display: '', url: '' }],
+    }));
+  }
+
+  function updateQuickLinkField(index: number, field: keyof QuickLinkInput, value: string) {
+    setForm((current) => ({
+      ...current,
+      quick_links: current.quick_links.map((link, i) => (i === index ? { ...link, [field]: value } : link)),
+    }));
+  }
+
+  function removeQuickLinkField(index: number) {
+    setForm((current) => ({
+      ...current,
+      quick_links: current.quick_links.filter((_, i) => i !== index),
+    }));
   }
 
   useEffect(() => {
@@ -240,6 +316,7 @@ export default function RequestsPage() {
     const title = form.title.trim();
     const requestedBy = form.requested_by.trim();
     const description = form.description.trim();
+    const quickLinks = toRequestQuickLinks(form.quick_links);
 
     if (!form.server || !title || !requestedBy || !description) {
       setFeedback('Please choose a server and fill in the title, requested by, and description fields.');
@@ -254,6 +331,7 @@ export default function RequestsPage() {
       requested_by: requestedBy,
       urgency: form.urgency,
       description,
+      quick_links: quickLinks,
       created_at: existingRequest?.created_at ?? new Date().toISOString(),
       completed: existingRequest?.completed ?? false,
       archived: existingRequest?.archived ?? false,
@@ -373,6 +451,22 @@ export default function RequestsPage() {
                 </div>
               </div>
               <p className={styles.description}>{request.description}</p>
+              {(request.quick_links ?? []).length > 0 && (
+                <div className={styles.quickLinksSection}>
+                  <p className={styles.quickLinksTitle}>Quick Links</p>
+                  <div className={styles.quickLinksGrid}>
+                    {(request.quick_links ?? []).map((link) => (
+                      <a
+                        key={`${request.id}-${link.display}-${link.url}`}
+                        href={link.url}
+                        className={styles.quickLinkCard}
+                      >
+                        {link.display}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className={styles.footer}>
                 <p className={styles.timestamp}>{request.created_at}</p>
                 <div className={styles.footerActions}>
@@ -483,6 +577,31 @@ export default function RequestsPage() {
                   placeholder="Describe what you need help with."
                 />
               </label>
+
+              <div className={styles.field}>
+                <div className={styles.quickLinksHeader}>
+                  <span>Quick Links <span className={styles.optional}>(optional)</span></span>
+                  <Button type="button" variant="ghost" size="sm" onClick={addQuickLinkField}>Add Link</Button>
+                </div>
+                {form.quick_links.length === 0 && (
+                  <p className={styles.quickLinksHint}>No quick links added. Add display text and a URL to show this section.</p>
+                )}
+                {form.quick_links.map((link, index) => (
+                  <div key={`request-quick-link-${index}`} className={styles.quickLinkRow}>
+                    <input
+                      value={link.display}
+                      onChange={(event) => updateQuickLinkField(index, 'display', event.target.value)}
+                      placeholder="Display text"
+                    />
+                    <input
+                      value={link.url}
+                      onChange={(event) => updateQuickLinkField(index, 'url', event.target.value)}
+                      placeholder="https://example.com"
+                    />
+                    <Button type="button" variant="ghost" size="sm" onClick={() => removeQuickLinkField(index)}>Remove</Button>
+                  </div>
+                ))}
+              </div>
 
               <div className={styles.modalActions}>
                 <Button type="button" variant="ghost" onClick={resetCreateModal}>Cancel</Button>

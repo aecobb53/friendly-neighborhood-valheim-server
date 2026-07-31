@@ -89,6 +89,9 @@ def update_event(event_id: str, event_content: EventDataObject) -> ResponseObjec
     if current_event.expanded_details != event_content.expanded_details:
         current_event.changelog.append(f"{current_time} Changed expanded_details from {current_event.expanded_details} to {event_content.expanded_details}")
         current_event.expanded_details = event_content.expanded_details
+    if current_event.quick_links != event_content.quick_links:
+        current_event.changelog.append(f"{current_time} Changed quick_links from {current_event.quick_links} to {event_content.quick_links}")
+        current_event.quick_links = event_content.quick_links
     # if current_event.image_url != event_content.image_url:
     #     current_event.changelog.append(f"{current_time} Changed image_url from {current_event.image_url} to {event_content.image_url}")
     #     current_event.image_url = event_content.image_url

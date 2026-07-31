@@ -12,7 +12,13 @@ export interface EventItem {
   meetup_location: string | null;
   expanded_details: string | null;
   image_url: string | null;
+  quick_links?: EventQuickLink[];
   created_at: string;
+}
+
+export interface EventQuickLink {
+  display: string;
+  url: string;
 }
 
 interface EventCardProps {
@@ -89,6 +95,7 @@ export function formatEventSchedule(
 
 export default function EventCard({ event, onOpen, onCopyLink, onEdit, copied }: EventCardProps) {
   const schedule = formatEventSchedule(event.event_date, event.start_time, event.end_time);
+  const quickLinks = event.quick_links ?? [];
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -143,6 +150,24 @@ export default function EventCard({ event, onOpen, onCopyLink, onEdit, copied }:
         {schedule && <p className={styles.schedule}>{schedule}</p>}
         {event.meetup_location && (
           <p className={styles.location}>📍 {event.meetup_location}</p>
+        )}
+
+        {quickLinks.length > 0 && (
+          <div className={styles.quickLinksSection}>
+            <p className={styles.quickLinksTitle}>Quick Links</p>
+            <div className={styles.linkGrid}>
+              {quickLinks.map((link) => (
+                <a
+                  key={`${event.id}-${link.display}-${link.url}`}
+                  href={link.url}
+                  className={styles.linkCard}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {link.display}
+                </a>
+              ))}
+            </div>
+          </div>
         )}
 
         <div className={styles.footer}>
