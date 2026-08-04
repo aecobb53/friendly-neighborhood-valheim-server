@@ -162,6 +162,28 @@
   align-items: center;
 }
 
+.copyImageButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.copyImageButton:hover {
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
 .serverBadge {
   display: inline-flex;
   align-items: center;

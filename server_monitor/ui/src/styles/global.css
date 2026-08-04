@@ -62,6 +62,21 @@ button {
   cursor: pointer;
 }
 
+select {
+  color: #f4f4f5;
+  background-color: #111827;
+}
+
+select option {
+  background-color: #111827;
+  color: #f4f4f5;
+}
+
+select optgroup {
+  background-color: #111827;
+  color: #f4f4f5;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

@@ -96,7 +96,7 @@ def carousel(page: str | None = None):
         },
         {
             "id": "home-3",
-            "image": "/gallery?id=gal-007",
+            "image": "/api/gallery/gal-007/media/Fader",
             "alt": "Another page",
             "title": "When do we take on Fader?",
             "subtitle": "The fight for the Ashlands is upon us!.",

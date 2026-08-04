@@ -559,9 +559,9 @@ Implemented behavior:
 * Poll cards now show type-specific result details for ranked choice, availability, rating, and text response poll types.
 * Closed polls always render result content, including a no-responses message when applicable.
 * Poll card Copy Link now uses icon-style action consistent with other cards.
-
+<!-- 
 In the ui, any dropdown has a white background and white text. Only when highlighted can I see what the options are. Can you 
-Add a link to gallery images
+Add a link to gallery images -->
 
 2026-08-04
 Finalized Polls backend summary payload and UI consumption.
