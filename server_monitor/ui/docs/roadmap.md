@@ -533,3 +533,42 @@ Implemented behavior:
 * Event and Request create/edit forms support adding multiple quick links.
 * Each quick link stores a display label and URL.
 * Quick links support internal paths and external URLs.
+
+2026-08-04
+Implemented initial Polls UI.
+
+Implemented behavior:
+* Added a Polls page with list, create, edit, and response submission flows.
+* Added Polls navigation entry and route integration.
+* Wired frontend Polls API calls for GET, POST, PUT, and poll response create.
+* Added poll response inputs for single choice, multi choice, ranked choice, availability, rating, short response, and Q&A.
+
+2026-08-04
+Improved Polls UX for results visibility and link sharing.
+
+Implemented behavior:
+* Poll cards now display result summaries directly on the list view.
+* Poll response modal refreshes and shows updated results after a vote submission.
+* Added Copy Link action for each poll card.
+* Added deep-link support using polls?id=<poll_id> with a clear filter action.
+
+2026-08-04
+Expanded Polls result rendering and copy-link styling updates.
+
+Implemented behavior:
+* Poll cards now show type-specific result details for ranked choice, availability, rating, and text response poll types.
+* Closed polls always render result content, including a no-responses message when applicable.
+* Poll card Copy Link now uses icon-style action consistent with other cards.
+
+In the ui, any dropdown has a white background and white text. Only when highlighted can I see what the options are. Can you 
+Add a link to gallery images
+
+2026-08-04
+Finalized Polls backend summary payload and UI consumption.
+
+Implemented behavior:
+* Poll list responses now come with backend-generated summaries for options, ranked weighted score totals, rating averages, availability totals, and recent text responses.
+* Poll cards and poll response modal now render backend summary data as the source of truth.
+* Added 10-second poll refresh to keep poll cards and open poll modal results current.
+* Closed polls continue showing options and results while response inputs remain disabled.
+

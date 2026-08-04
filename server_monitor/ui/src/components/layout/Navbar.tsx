@@ -3,6 +3,7 @@ import styles from './Navbar.module.css';
 
 const CENTER_LINKS = [
   { to: '/events', label: 'Events' },
+  { to: '/polls', label: 'Polls' },
   { to: '/gallery', label: 'Gallery' },
   { to: '/maps', label: 'Maps' },
   { to: '/requests', label: 'Requests' },

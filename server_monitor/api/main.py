@@ -28,6 +28,7 @@ from common.exceptions import ServerNotFoundError
 from routes.servers.route import router as service_router
 from routes.requests.route import router as requests_router
 from routes.events.route import router as event_router
+from routes.polls.route import router as polls_router
 from routes.gallery.route import gallery_router, map_router
 from core.exception_handler import server_not_found
 from common.utils import CONTENT_DIR
@@ -35,6 +36,7 @@ from common.utils import CONTENT_DIR
 app.include_router(service_router)
 app.include_router(requests_router)
 app.include_router(event_router)
+app.include_router(polls_router)
 app.include_router(gallery_router)
 app.include_router(map_router)
 app.add_exception_handler(ServerNotFoundError, server_not_found)
@@ -91,9 +93,17 @@ def carousel(page: str | None = None):
             "title": "Hellheim",
             "subtitle": "There is a new server we're considering supporting! Hardcore mode coming to you!",
             "href": "/servers"
-        },  
+        },
         {
             "id": "home-3",
+            "image": "/gallery?id=gal-007",
+            "alt": "Another page",
+            "title": "When do we take on Fader?",
+            "subtitle": "The fight for the Ashlands is upon us!.",
+            "href": "/servers"
+        },
+        {
+            "id": "home-4",
             "image": "/static/images/carousel/Minecraft.png",
             "alt": "Another page",
             "title": "Do we want to start a Minecraft server?",
@@ -101,7 +111,7 @@ def carousel(page: str | None = None):
             "href": "/servers"
         },
         {
-            "id": "home-4",
+            "id": "home-5",
             "image": "/static/images/carousel/Windrose.png",
             "alt": "Another page",
             "title": "Windrose",

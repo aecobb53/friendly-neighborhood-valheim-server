@@ -1,0 +1,29 @@
+{
+    "id": "poll-001",
+    "title": "When to fight Fader!",
+    "description": "Its time to take on the boss of the south!",
+    "poll_type": "ranked_choice",
+    "status": "open",
+    "anonymous_responses": false,
+    "allow_vote_changes": true,
+    "options": [
+        {
+            "id": "opt-1",
+            "label": "Friday 8/14"
+        },
+        {
+            "id": "opt-2",
+            "label": "Friday 8/21"
+        },
+        {
+            "id": "opt-3",
+            "label": "Friday 8/28"
+        }
+    ],
+    "questions": [],
+    "created_by": "Nax",
+    "created_at": "2026-08-04T03:20:57.089733Z",
+    "updated_at": "2026-08-04T03:22:26.068460Z",
+    "changelog": [],
+    "response_count": 1
+}

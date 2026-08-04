@@ -15,6 +15,8 @@ CONTENT_DIR = Path("/app/content")
 SERVERS_DIR = CONTENT_DIR / "servers"
 REQUESTS_DIR = CONTENT_DIR / "requests"
 EVENTS_DIR = CONTENT_DIR / "events"
+POLLS_DIR = CONTENT_DIR / "polls"
+POLL_RESPONSES_DIR = CONTENT_DIR / "poll_responses"
 IMAGES_DIR = Path("/app/images")
 
 

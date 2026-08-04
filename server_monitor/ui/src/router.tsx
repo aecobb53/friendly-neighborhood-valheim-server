@@ -6,6 +6,7 @@ import ServersDashboardPage from '@/pages/ServersDashboardPage';
 import ServerOverviewPage from '@/pages/ServerOverviewPage';
 import RequestsPage from '@/pages/RequestsPage';
 import EventsPage from '@/pages/EventsPage';
+import PollsPage from '@/pages/PollsPage';
 import GalleryPage from '@/pages/GalleryPage';
 import MapsPage from '@/pages/MapsPage';
 
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: 'servers', element: <ServersDashboardPage /> },
       { path: 'requests', element: <RequestsPage /> },
       { path: 'events', element: <EventsPage /> },
+      { path: 'polls', element: <PollsPage /> },
       { path: 'gallery', element: <GalleryPage /> },
       { path: 'maps', element: <MapsPage /> },
       { path: 'servers/:name', element: <ServerOverviewPage /> },
