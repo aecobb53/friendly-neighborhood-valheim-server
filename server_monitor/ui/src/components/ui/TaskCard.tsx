@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import Card from './Card';
+import MarkdownText from './MarkdownText';
 import styles from './TaskCard.module.css';
 
 interface TaskCardProps {
@@ -69,8 +70,8 @@ export default function TaskCard({
       <div className={styles.body}>
         <div className={styles.text}>
           <h3 className={styles.title}>{title}</h3>
-          <p className={styles.description}>{description}</p>
-          <p className={styles.content}>{content}</p>
+          <MarkdownText className={styles.description} content={description} />
+          <MarkdownText className={styles.content} content={content} />
         </div>
 
         {footer && <div className={styles.footer}>{footer}</div>}

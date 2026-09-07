@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
+import MarkdownText from '@/components/ui/MarkdownText';
 import { Button, Card, LoadingState, PageHeader } from '@/components/ui';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import styles from './PollsPage.module.css';
@@ -678,7 +679,7 @@ export default function PollsPage() {
                   </div>
                 </div>
 
-                {poll.description && <p className={styles.description}>{poll.description}</p>}
+                {poll.description && <MarkdownText className={styles.description} content={poll.description} />}
 
                 <div className={styles.resultsSection}>
                   <p className={styles.resultsTitle}>Results</p>
@@ -726,7 +727,7 @@ export default function PollsPage() {
                         {summary.recent_text_responses.map((item) => (
                           <div key={item.response_id} className={styles.textResultItem}>
                             <p className={styles.textResultUser}>{item.user}</p>
-                            <p className={styles.textResultBody}>{item.text}</p>
+                            <MarkdownText className={styles.textResultBody} content={item.text} />
                           </div>
                         ))}
                       </div>
@@ -903,7 +904,7 @@ export default function PollsPage() {
               <button className={styles.closeButton} type="button" onClick={closeResponseModal} aria-label="Close poll response">×</button>
             </div>
 
-            <p className={styles.description}>{selectedPoll.description}</p>
+            <MarkdownText className={styles.description} content={selectedPoll.description} />
 
             <div className={styles.resultsSection}>
               <p className={styles.resultsTitle}>Current Results</p>
@@ -941,7 +942,7 @@ export default function PollsPage() {
                     {selectedPoll.summary.recent_text_responses.map((item) => (
                       <div key={item.response_id} className={styles.textResultItem}>
                         <p className={styles.textResultUser}>{item.user}</p>
-                        <p className={styles.textResultBody}>{item.text}</p>
+                        <MarkdownText className={styles.textResultBody} content={item.text} />
                       </div>
                     ))}
                   </div>

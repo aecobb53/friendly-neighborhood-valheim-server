@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
+import MarkdownText from '@/components/ui/MarkdownText';
 import { Button, Card, LoadingState, PageHeader } from '@/components/ui';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import styles from './RequestsPage.module.css';
@@ -460,7 +461,7 @@ export default function RequestsPage() {
                   <span className={styles.urgencyBadge}>{request.urgency}</span>
                 </div>
               </div>
-              <p className={styles.description}>{request.description}</p>
+              <MarkdownText className={styles.description} content={request.description} />
               {(request.quick_links ?? []).length > 0 && (
                 <div className={styles.quickLinksSection}>
                   <p className={styles.quickLinksTitle}>Quick Links</p>

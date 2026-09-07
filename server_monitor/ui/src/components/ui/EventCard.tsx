@@ -1,4 +1,5 @@
 import Card from './Card';
+import MarkdownText from './MarkdownText';
 import styles from './EventCard.module.css';
 
 export interface EventItem {
@@ -145,7 +146,7 @@ export default function EventCard({ event, onOpen, onCopyLink, onEdit, copied }:
           </div>
         </div>
 
-        <p className={styles.description}>{event.description}</p>
+        <MarkdownText className={styles.description} content={event.description} />
 
         {schedule && <p className={styles.schedule}>{schedule}</p>}
         {event.meetup_location && (

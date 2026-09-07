@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { api } from '@/api/client';
+import MarkdownText from '@/components/ui/MarkdownText';
 import { Card, ErrorState, FeaturedCarousel, LoadingState, PageHeader, StatusBadge } from '@/components/ui';
 import type { CarouselSlide } from '@/components/ui/FeaturedCarousel';
 import type { ServerInfo } from '@/types/server';
@@ -263,7 +264,7 @@ export default function ServerOverviewPage() {
 
             <div className={styles.summaryNote}>
               <p className={styles.label}>Latest Update</p>
-              <p className={styles.value}>{latestStatus?.message ?? 'No recent updates have been recorded yet.'}</p>
+              <MarkdownText className={styles.value} content={latestStatus?.message ?? 'No recent updates have been recorded yet.'} />
             </div>
           </Card>
 
@@ -283,7 +284,9 @@ export default function ServerOverviewPage() {
             {serverNews.length > 0 ? (
               <ul className={styles.newsList}>
                 {serverNews.map((item, index) => (
-                  <li key={`${item}-${index}`} className={styles.newsItem}>{item}</li>
+                  <li key={`${item}-${index}`} className={styles.newsItem}>
+                    <MarkdownText content={item} />
+                  </li>
                 ))}
               </ul>
             ) : (
@@ -298,7 +301,9 @@ export default function ServerOverviewPage() {
             {serverRules.length > 0 ? (
               <ul className={styles.list}>
                 {serverRules.map((item, index) => (
-                  <li key={`${item}-${index}`}>{item}</li>
+                  <li key={`${item}-${index}`}>
+                    <MarkdownText content={item} />
+                  </li>
                 ))}
               </ul>
             ) : (
@@ -316,7 +321,7 @@ export default function ServerOverviewPage() {
                     <div className={styles.logHeader}>
                       <StatusBadge status={entry.status} />
                     </div>
-                    <span className={styles.logBody}>{entry.message}</span>
+                    <MarkdownText className={styles.logBody} content={entry.message} />
                   </div>
                 ))}
               </div>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FeaturedCarousel, Card } from '@/components/ui';
+import MarkdownText from '@/components/ui/MarkdownText';
 import type { CarouselSlide } from '@/components/ui/FeaturedCarousel';
 import { api } from '@/api/client';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -140,7 +141,7 @@ export default function HomePage() {
         <ul className={styles.newsList}>
           {whatsNewItems.map((item) => (
             <li key={item} className={styles.newsItem}>
-              {item}
+              <MarkdownText content={item} />
             </li>
           ))}
         </ul>

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { Server } from '@/types/server';
 import Card from './Card';
+import MarkdownText from './MarkdownText';
 import StatusBadge from './StatusBadge';
 import styles from './ServerCard.module.css';
 
@@ -49,7 +50,7 @@ export default function ServerCard({ server, description, imageUrl }: ServerCard
           <StatusBadge status={server.server_status} />
         </div>
 
-        <p className={styles.message}>{description ?? server.last_message}</p>
+        <MarkdownText className={styles.message} content={description ?? server.last_message} />
       </div>
     </Card>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
+import MarkdownText from '@/components/ui/MarkdownText';
 import { Button, Card, LoadingState, PageHeader } from '@/components/ui';
 import EventCard, { formatEventSchedule } from '@/components/ui/EventCard';
 import type { EventItem } from '@/components/ui/EventCard';
@@ -409,7 +410,7 @@ export default function EventsPage() {
               )}
             </div>
 
-            <p className={styles.detailDescription}>{selectedEvent.description}</p>
+            <MarkdownText className={styles.detailDescription} content={selectedEvent.description} />
 
             {(selectedEvent.quick_links ?? []).length > 0 && (
               <div className={styles.quickLinksSection}>
@@ -439,7 +440,7 @@ export default function EventsPage() {
                   {detailsExpanded ? '▾ Hide details' : '▸ Event details'}
                 </button>
                 {detailsExpanded && (
-                  <p className={styles.expandedContent}>{selectedEvent.expanded_details}</p>
+                  <MarkdownText className={styles.expandedContent} content={selectedEvent.expanded_details} />
                 )}
               </div>
             )}

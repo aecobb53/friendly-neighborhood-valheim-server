@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import MarkdownText from './MarkdownText';
 import styles from './PageHeader.module.css';
 
 interface PageHeaderProps {
@@ -13,7 +14,7 @@ export default function PageHeader({ title, subtitle, actions }: PageHeaderProps
     <div className={styles.header}>
       <div className={styles.text}>
         <h1 className={styles.title}>{title}</h1>
-        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        {subtitle && <MarkdownText content={subtitle} />}
       </div>
       {actions && <div className={styles.actions}>{actions}</div>}
     </div>
