@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
+import MarkdownText from '@/components/ui/MarkdownText';
 import { LoadingState, ErrorState, PageHeader } from '@/components/ui';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import styles from './MapsPage.module.css';
@@ -296,7 +297,7 @@ export default function MapsPage() {
       ) : mapData ? (
         <>
           <div className={styles.meta}>
-            <p className={styles.description}>{mapData.description}</p>
+            <MarkdownText className={styles.description} content={mapData.description} />
             <p className={styles.lastUpdated}>
               <span className={styles.lastUpdatedLabel}>Last Updated</span>
               {formatLastUpdated(mapData.last_updated)}

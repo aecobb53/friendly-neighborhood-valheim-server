@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
+import MarkdownText from '@/components/ui/MarkdownText';
 import { Button, Card, LoadingState, PageHeader } from '@/components/ui';
 import GalleryCard from '@/components/ui/GalleryCard';
 import type { GalleryItem } from '@/components/ui/GalleryCard';
@@ -342,7 +343,7 @@ export default function GalleryPage() {
             </div>
 
             {selectedItem.description && (
-              <p className={styles.detailDescription}>{selectedItem.description}</p>
+              <MarkdownText className={styles.detailDescription} content={selectedItem.description} />
             )}
           </div>
         </div>

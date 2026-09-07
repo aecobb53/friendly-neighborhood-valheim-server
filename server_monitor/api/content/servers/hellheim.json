@@ -3,7 +3,11 @@
   "game": "Valheim",
   "display_name": "Hellheim",
   "expected": true,
-  "description": "Hard mode high rewards Valheim server",
-  "news": [],
-  "rules": []
+  "description": "Hard mode high rewards Valheim server \n - Current mod code: `01a079e3-4364-0971-e4e8-2c37c80e5f84` _(updated 09/06/2026)_\n### Server settings\n- combat: [color:red]Very Hard[/color]\n- deathpenalty: [color:green]Casual[/color] [highlight:green](keep items and minimal exp loss)[/highlight]\n- resourcerate: x3\n- raidrate: [color:green]Much More[/color]\ntext~subsript~text^supersript^\nExample Text:\n[color:poor+icon]poor[/color]\n[color:common+icon]common[/color]\n[color:uncommon+icon]uncommon[/color]\n[color:rare+icon]rare[/color]\n[color:epic+icon]epic[/color]\n[color:legendary+icon]legendary[/color]\n[color:ancient+icon]ancient[/color]\n[color:mythic+icon]mythic[/color]\n",
+  "news": [
+    "Trying out a new hard combat server!"
+  ],
+  "rules": [
+    "Have fun!"
+  ]
 }
