@@ -1,4 +1,4 @@
-.wrap {
+.inlineWrap {
   display: inline-flex;
   align-items: baseline;
   gap: 0.35rem;
