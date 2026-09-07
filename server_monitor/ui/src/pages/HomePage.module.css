@@ -94,4 +94,43 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1000px) {
+  .root {
+    gap: var(--space-10);
+  }
+
+  .navGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .root {
+    gap: var(--space-8);
+  }
+
+  .welcomeTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .welcomeText {
+    font-size: var(--font-size-base);
+  }
+
+  .newsItem {
+    padding: var(--space-3) var(--space-4);
+    overflow-wrap: anywhere;
+  }
+
+  .navGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .navCard {
+    gap: var(--space-2);
+  }
 }

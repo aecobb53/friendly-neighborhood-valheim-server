@@ -152,6 +152,7 @@
   margin: 0;
   color: #e5e7eb;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .expandedSection {
@@ -183,6 +184,7 @@
   color: #d1d5db;
   line-height: 1.6;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .quickLinksSection {
@@ -212,6 +214,7 @@
   color: #e5e7eb;
   text-decoration: none;
   background: rgba(255, 255, 255, 0.02);
+  overflow-wrap: anywhere;
 }
 
 .quickLinkCard:hover {
@@ -292,7 +295,57 @@
 }
 
 @media (max-width: 820px) {
+  .toolbar {
+    justify-content: stretch;
+  }
+
+  .toolbar > * {
+    width: 100%;
+  }
+
+  .modal {
+    width: calc(100% - 1.25rem);
+    max-height: calc(100vh - 1.25rem);
+    padding: 1rem;
+    border-radius: 0.85rem;
+  }
+
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .modalActions > * {
+    width: 100%;
+  }
+
   .quickLinkRow {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .overlay {
+    padding: 0.625rem;
+  }
+
+  .modalHeader {
+    gap: 0.625rem;
+  }
+
+  .modalTitle {
+    font-size: 1.1rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .closeButton {
+    font-size: 1.8rem;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
   }
 }

@@ -24,3 +24,18 @@
   margin-top: var(--space-4);
   font-size: var(--font-size-base);
 }
+
+@media (max-width: 680px) {
+  .root {
+    padding: var(--space-10) 0;
+    gap: var(--space-3);
+  }
+
+  .code {
+    font-size: 3.75rem;
+  }
+
+  .message {
+    font-size: var(--font-size-base);
+  }
+}

@@ -43,9 +43,7 @@
   font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .message {
@@ -56,4 +54,25 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
+}
+
+@media (max-width: 680px) {
+  .banner {
+    height: 64px;
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .body {
+    padding: var(--space-4);
+  }
+
+  .titleRow {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .message {
+    -webkit-line-clamp: 3;
+    overflow-wrap: anywhere;
+  }
 }

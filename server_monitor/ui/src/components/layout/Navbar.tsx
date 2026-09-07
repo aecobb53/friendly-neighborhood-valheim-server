@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import styles from './Navbar.module.css';
 
 const CENTER_LINKS = [
@@ -10,6 +11,24 @@ const CENTER_LINKS = [
 ];
 
 export default function Navbar() {
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.inner}>
@@ -46,6 +65,51 @@ export default function Navbar() {
           Servers
         </NavLink>
 
+        <button
+          type="button"
+          className={styles.menuButton}
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav-menu"
+          aria-label="Toggle navigation menu"
+        >
+          <span className={styles.menuButtonBar} />
+          <span className={styles.menuButtonBar} />
+          <span className={styles.menuButtonBar} />
+        </button>
+
+      </div>
+
+      <div
+        id="mobile-nav-menu"
+        className={[styles.mobileMenu, menuOpen ? styles.mobileMenuOpen : ''].join(' ')}
+      >
+        <ul className={styles.mobileLinks}>
+          {CENTER_LINKS.map(({ to, label }) => (
+            <li key={`mobile-${to}`}>
+              <NavLink
+                to={to}
+                className={({ isActive }) =>
+                  [styles.mobileNavLink, isActive ? styles.mobileNavLinkActive : ''].join(' ')
+                }
+                onClick={() => setMenuOpen(false)}
+              >
+                {label}
+              </NavLink>
+            </li>
+          ))}
+          <li>
+            <NavLink
+              to="/servers"
+              className={({ isActive }) =>
+                [styles.mobileServersLink, isActive ? styles.mobileServersLinkActive : ''].join(' ')
+              }
+              onClick={() => setMenuOpen(false)}
+            >
+              Servers Dashboard
+            </NavLink>
+          </li>
+        </ul>
       </div>
     </nav>
   );

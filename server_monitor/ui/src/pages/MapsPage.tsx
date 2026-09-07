@@ -88,6 +88,8 @@ export default function MapsPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ startX: number; startY: number; startTx: number; startTy: number } | null>(null);
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchState = useRef<{ distance: number; scale: number } | null>(null);
 
   // ── Fullscreen listener ───────────────────────
   useEffect(() => {
@@ -179,29 +181,79 @@ export default function MapsPage() {
     });
   }, []);
 
-  // ── Pan via drag ──────────────────────────────
-  function handleMouseDown(e: React.MouseEvent) {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    dragState.current = { startX: e.clientX, startY: e.clientY, startTx: translate.x, startTy: translate.y };
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType === 'mouse' && e.button !== 0) {
+      return;
+    }
+
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    e.currentTarget.setPointerCapture(e.pointerId);
+
+    if (pointersRef.current.size === 1) {
+      dragState.current = { startX: e.clientX, startY: e.clientY, startTx: translate.x, startTy: translate.y };
+      pinchState.current = null;
+      return;
+    }
+
+    if (pointersRef.current.size === 2) {
+      const values = Array.from(pointersRef.current.values());
+      const dx = values[0].x - values[1].x;
+      const dy = values[0].y - values[1].y;
+      pinchState.current = {
+        distance: Math.hypot(dx, dy),
+        scale,
+      };
+      dragState.current = null;
+    }
   }
 
-  useEffect(() => {
-    function handleMouseMove(e: MouseEvent) {
-      if (!dragState.current) return;
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!pointersRef.current.has(e.pointerId)) {
+      return;
+    }
+
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size === 1 && dragState.current) {
       const dx = e.clientX - dragState.current.startX;
       const dy = e.clientY - dragState.current.startY;
       setTranslate({ x: dragState.current.startTx + dx, y: dragState.current.startTy + dy });
+      return;
     }
-    function handleMouseUp() { dragState.current = null; }
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
+    if (pointersRef.current.size === 2 && pinchState.current) {
+      const values = Array.from(pointersRef.current.values());
+      const dx = values[0].x - values[1].x;
+      const dy = values[0].y - values[1].y;
+      const nextDistance = Math.hypot(dx, dy);
+
+      if (pinchState.current.distance > 0) {
+        const ratio = nextDistance / pinchState.current.distance;
+        const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinchState.current.scale * ratio));
+        setScale(nextScale);
+      }
+    }
+  }
+
+  function handlePointerUpOrCancel(e: React.PointerEvent<HTMLDivElement>) {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size === 0) {
+      dragState.current = null;
+      pinchState.current = null;
+      return;
+    }
+
+    if (pointersRef.current.size === 1) {
+      const point = Array.from(pointersRef.current.values())[0];
+      dragState.current = {
+        startX: point.x,
+        startY: point.y,
+        startTx: translate.x,
+        startTy: translate.y,
+      };
+      pinchState.current = null;
+    }
+  }
 
   function resetView() {
     setScale(1);
@@ -263,7 +315,10 @@ export default function MapsPage() {
               ref={containerRef}
               className={`${styles.mapContainer} ${isFullscreen ? styles.fullscreen : ''}`}
               onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUpOrCancel}
+              onPointerCancel={handlePointerUpOrCancel}
             >
               <img
                 className={styles.mapImage}

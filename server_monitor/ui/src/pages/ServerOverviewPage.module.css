@@ -50,6 +50,7 @@
 .value {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
+  overflow-wrap: anywhere;
 }
 
 .sectionTitle {
@@ -100,11 +101,13 @@
 
 .newsItem {
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .linkGrid {
   display: grid;
   gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .linkCard {
@@ -115,6 +118,7 @@
   color: var(--color-text-primary);
   text-decoration: none;
   background: rgba(255, 255, 255, 0.02);
+  text-align: center;
 }
 
 .list {
@@ -165,6 +169,7 @@
 .logBody {
   color: var(--color-text-secondary);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .logHeader {
@@ -179,5 +184,30 @@
 
   .summaryRow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .root {
+    gap: var(--space-6);
+  }
+
+  .summary,
+  .section {
+    gap: var(--space-4);
+  }
+
+  .summaryRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .linkGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .list,
+  .newsList {
+    padding-left: 1rem;
   }
 }
