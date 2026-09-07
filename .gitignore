@@ -1,29 +1,15 @@
 # Project Specific
 .env
+main/backups/
+main/saves/
+main/server/*.sh
+hell/backups/
+hell/saves/
+hell/server/*.sh
 server_monitor/monitor/storage
 server_monitor/shared/states
 server_backup.files
 server_monitor/errors/
-server_monitor/api/content/
-!server_monitor/api/content/servers
-
-main/**
-!main/server/
-!main/server/BepInEx/
-!main/server/BepInEx/config/
-!main/server/BepInEx/config/**
-main/server/BepInEx/config/Seasonality/LastSeasonChangeData/
-
-
-hell/**
-!hell/server/
-!hell/server/BepInEx/
-!hell/server/BepInEx/config/
-!hell/server/BepInEx/config/**
-
-
-
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
