@@ -264,6 +264,36 @@
   font-style: italic;
 }
 
+.fileList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.7rem;
+  background: rgba(2, 6, 23, 0.4);
+  max-height: 9rem;
+  overflow-y: auto;
+}
+
+.fileItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  color: #d1d5db;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.fileItem:last-child {
+  border-bottom: 0;
+}
+
+.fileSize {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
 .modalActions {
   display: flex;
   justify-content: flex-end;

@@ -20,11 +20,20 @@ async function request<T>(
   options?: RequestInit,
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE}${path}`;
+  const isFormData = options?.body instanceof FormData;
+  const hasExplicitContentType = Boolean((options?.headers as Record<string, string> | undefined)?.['Content-Type']);
+
+  const mergedHeaders: HeadersInit = isFormData
+    ? { ...(options?.headers ?? {}) }
+    : {
+      ...(hasExplicitContentType ? {} : { 'Content-Type': 'application/json' }),
+      ...(options?.headers ?? {}),
+    };
 
   let response: Response;
   try {
     response = await fetch(url, {
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      headers: mergedHeaders,
       ...options,
     });
   } catch (networkError) {
@@ -77,6 +86,13 @@ export const api = {
     return request<T>(path, {
       method: 'POST',
       body: JSON.stringify(body),
+      ...options,
+    });
+  },
+  postForm<T>(path: string, body: FormData, options?: RequestInit): Promise<ApiResponse<T>> {
+    return request<T>(path, {
+      method: 'POST',
+      body,
       ...options,
     });
   },

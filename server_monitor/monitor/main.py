@@ -71,6 +71,13 @@ class TrackedContainer:
         finally:
             self.thread = None
             self.container_status = ContainerStatus.STOPPED
+            self.server_status_list.append({
+                "status": ServerStatus.OFFLINE,
+                "message": "Server has been shut down",
+                "line": "Container log stream ended",
+                "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            })
+            self._save_current_state()
 
     def _save_current_state(self):
         state_timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -142,12 +149,31 @@ def watch_containers(client, tracked):
 
         if action in ['start', 'create']:
             if cid not in tracked:
+                container = client.containers.get(cid)
+                labels = container.labels
+                server_name = labels.get("server_monitor.server_name", "Unknown Server Name")
                 tracked[cid] = TrackedContainer(
-                    container=client.containers.get(cid),
+                    container=container,
                     parser=ValheimParser(),
                     container_status=ContainerStatus.RUNNING,
+                    server_name=server_name,
                 )
                 tracked[cid].start()
+            else:
+                tracked[cid].container_status = ContainerStatus.RUNNING
+                tracked[cid].start()
+
+        if action in ['die', 'stop', 'destroy', 'kill']:
+            if cid in tracked:
+                tracked_container = tracked[cid]
+                tracked_container.container_status = ContainerStatus.STOPPED
+                tracked_container.server_status_list.append({
+                    "status": ServerStatus.OFFLINE,
+                    "message": f"Container event: {action}",
+                    "line": f"Docker event '{action}' received",
+                    "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                })
+                tracked_container._save_current_state()
 
 
 def heartbeat_tracked_states(tracked):

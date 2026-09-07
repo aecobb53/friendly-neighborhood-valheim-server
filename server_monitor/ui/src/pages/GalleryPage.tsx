@@ -74,6 +74,7 @@ export default function GalleryPage() {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [showUpload, setShowUpload] = useState(false);
   const [form, setForm] = useState<CreateGalleryForm>(createEmptyForm());
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedImageUrl, setCopiedImageUrl] = useState<string | null>(null);
@@ -97,6 +98,17 @@ export default function GalleryPage() {
   function openDetail(item: GalleryItem) {
     setSelectedItem(item);
     setMediaIndex(0);
+  }
+
+  function openUploadModal() {
+    setSelectedFiles([]);
+    setFeedback(null);
+    setShowUpload(true);
+  }
+
+  function closeUploadModal() {
+    setShowUpload(false);
+    setSelectedFiles([]);
   }
 
   function closeDetail() {
@@ -191,31 +203,30 @@ export default function GalleryPage() {
       return;
     }
 
-    const newItem = {
-      id: `local-${Date.now()}`,
-      server: form.server,
-      title: form.title.trim() || null,
-      description: form.description.trim() || null,
-      media_count: 0,
-      preview_url: '',
-      media_urls: [],
-      created_at: new Date().toISOString(),
-    };
+    if (selectedFiles.length === 0) {
+      setFeedback('Please select at least one image to upload.');
+      return;
+    }
 
-    const response = await api.post<{ data?: Partial<GalleryItem> } | Partial<GalleryItem>>('/gallery', newItem);
+    const payload = new FormData();
+    payload.append('server', form.server);
+    if (form.title.trim()) payload.append('title', form.title.trim());
+    if (form.description.trim()) payload.append('description', form.description.trim());
+    selectedFiles.forEach((file) => payload.append('files', file));
+
+    const response = await api.postForm<{ file_count?: number }>('/gallery/upload', payload);
 
     if (!response.success) {
       setFeedback(response.error.message);
       return;
     }
 
-    const created = (response.data as { data?: Partial<GalleryItem> })?.data ?? (response.data as Partial<GalleryItem>);
-    const finalItem: GalleryItem = created?.id ? { ...newItem, ...created } as GalleryItem : newItem;
-
-    setItems((current) => [finalItem, ...current]);
+    const uploadedCount = response.data.file_count ?? selectedFiles.length;
+    setFeedback(`Upload request sent for ${uploadedCount} image${uploadedCount === 1 ? '' : 's'}.`);
     setForm(createEmptyForm(availableServers[0] ?? ''));
-    setFeedback('Gallery entry added.');
+    setSelectedFiles([]);
     setShowUpload(false);
+    return;
   }
 
   const currentMediaUrl = selectedItem?.media_urls[mediaIndex] ?? selectedItem?.preview_url ?? '';
@@ -229,7 +240,7 @@ export default function GalleryPage() {
       />
 
       <div className={styles.toolbar}>
-        <Button onClick={() => setShowUpload(true)}>Upload Media</Button>
+        <Button onClick={openUploadModal}>Upload Media</Button>
       </div>
 
       {feedback && <p className={styles.feedback}>{feedback}</p>}
@@ -240,7 +251,7 @@ export default function GalleryPage() {
         <Card className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>No screenshots have been shared yet.</h2>
           <p className={styles.emptyText}>Go create something worth remembering!</p>
-          <Button onClick={() => setShowUpload(true)}>Upload the first screenshot</Button>
+          <Button onClick={openUploadModal}>Upload the first screenshot</Button>
         </Card>
       ) : (
         <div className={styles.grid}>
@@ -327,11 +338,11 @@ export default function GalleryPage() {
 
       {/* Upload Modal */}
       {showUpload && (
-        <div className={styles.overlay} role="presentation" onClick={() => setShowUpload(false)}>
+        <div className={styles.overlay} role="presentation" onClick={closeUploadModal}>
           <div className={styles.modal} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Upload Media</h2>
-              <button className={styles.closeButton} type="button" onClick={() => setShowUpload(false)} aria-label="Close upload form">×</button>
+              <button className={styles.closeButton} type="button" onClick={closeUploadModal} aria-label="Close upload form">×</button>
             </div>
 
             <form className={styles.form} onSubmit={handleUpload}>
@@ -371,13 +382,32 @@ export default function GalleryPage() {
                 />
               </label>
 
-              <p className={styles.uploadNote}>
-                Image upload will be available once the backend file handling is ready.
-              </p>
+              <label className={styles.field}>
+                <span>Images</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => setSelectedFiles(Array.from(e.target.files ?? []))}
+                />
+              </label>
+
+              {selectedFiles.length > 0 ? (
+                <ul className={styles.fileList}>
+                  {selectedFiles.map((file, index) => (
+                    <li key={`${file.name}-${index}`} className={styles.fileItem}>
+                      <span>{file.name}</span>
+                      <span className={styles.fileSize}>{Math.max(1, Math.round(file.size / 1024))} KB</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className={styles.uploadNote}>Select one or more images to send to the upload endpoint.</p>
+              )}
 
               <div className={styles.modalActions}>
-                <Button type="button" variant="ghost" onClick={() => setShowUpload(false)}>Cancel</Button>
-                <Button type="submit">Create Entry</Button>
+                <Button type="button" variant="ghost" onClick={closeUploadModal}>Cancel</Button>
+                <Button type="submit">Upload Selected Images</Button>
               </div>
             </form>
           </div>

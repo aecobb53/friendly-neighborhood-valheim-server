@@ -45,6 +45,8 @@ export default function ServerOverviewPage() {
   const { name } = useParams<{ name: string }>();
   const location = useLocation();
   const [server, setServer] = useState<ServerInfo | null>(null);
+  const [serverNews, setServerNews] = useState<string[]>([]);
+  const [serverRules, setServerRules] = useState<string[]>([]);
   const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +91,68 @@ export default function ServerOverviewPage() {
   useEffect(() => {
     let cancelled = false;
 
+    async function loadServerRules() {
+      if (!name) {
+        if (!cancelled) {
+          setServerRules([]);
+        }
+        return;
+      }
+
+      const response = await api.get<string[]>(`/servers/${encodeURIComponent(name)}/rules`);
+
+      if (cancelled) {
+        return;
+      }
+
+      if (response.success && Array.isArray(response.data)) {
+        setServerRules(response.data);
+      } else {
+        setServerRules([]);
+      }
+    }
+
+    loadServerRules();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [name]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadServerNews() {
+      if (!name) {
+        if (!cancelled) {
+          setServerNews([]);
+        }
+        return;
+      }
+
+      const response = await api.get<string[]>(`/servers/${encodeURIComponent(name)}/news`);
+
+      if (cancelled) {
+        return;
+      }
+
+      if (response.success && Array.isArray(response.data)) {
+        setServerNews(response.data);
+      } else {
+        setServerNews([]);
+      }
+    }
+
+    loadServerNews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [name]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     async function loadCarousel() {
       const page = encodeURIComponent(location.pathname || '/');
       const response = await api.get<CarouselApiItem[]>(`/carousel?page=${page}`);
@@ -110,8 +174,10 @@ export default function ServerOverviewPage() {
     };
   }, [location.pathname]);
 
-  const latestStatus = server?.server_status_list[0];
-  const recentNews = server?.server_status_list.slice(0, 3) ?? [];
+  const latestStatus = server && server.server_status_list.length
+    ? server.server_status_list[server.server_status_list.length - 1]
+    : undefined;
+  const recentStatusEntries = server ? server.server_status_list.slice(-20).reverse() : [];
   const quickLinks = useMemo(() => {
     if (!server) {
       return [];
@@ -189,37 +255,42 @@ export default function ServerOverviewPage() {
 
           <Card className={styles.section}>
             <h2 className={styles.sectionTitle}>Recent News</h2>
-            <div className={styles.historyList}>
-              {recentNews.map((entry) => (
-                <div key={`${entry.timestamp}-${entry.status}`} className={styles.historyItem}>
-                  <div>
-                    <StatusBadge status={entry.status} />
-                    <p className={styles.historyMessage}>{entry.message}</p>
-                  </div>
-                  <time className={styles.historyTime}>{entry.timestamp}</time>
-                </div>
-              ))}
-            </div>
+            {serverNews.length > 0 ? (
+              <ul className={styles.newsList}>
+                {serverNews.map((item, index) => (
+                  <li key={`${item}-${index}`} className={styles.newsItem}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.value}>No news has been posted for this server yet.</p>
+            )}
           </Card>
         </div>
 
         <div className={styles.column}>
           <Card className={styles.section}>
             <h2 className={styles.sectionTitle}>Rules</h2>
-            <ul className={styles.list}>
-              <li>Be kind and respectful to everyone in the community.</li>
-              <li>Keep builds and events welcoming for new players.</li>
-              <li>Share updates in the server channel so others can follow along.</li>
-            </ul>
+            {serverRules.length > 0 ? (
+              <ul className={styles.list}>
+                {serverRules.map((item, index) => (
+                  <li key={`${item}-${index}`}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.value}>No rules have been posted for this server yet.</p>
+            )}
           </Card>
 
           <Card className={styles.section}>
             <details className={styles.details}>
               <summary className={styles.detailsSummary}>Server Logs</summary>
               <div className={styles.logList}>
-                {server.server_status_list.map((entry) => (
+                {recentStatusEntries.map((entry) => (
                   <div key={`${entry.timestamp}-${entry.status}`} className={styles.logEntry}>
                     <span className={styles.logTime}>{entry.timestamp}</span>
+                    <div className={styles.logHeader}>
+                      <StatusBadge status={entry.status} />
+                    </div>
                     <span className={styles.logBody}>{entry.message}</span>
                   </div>
                 ))}

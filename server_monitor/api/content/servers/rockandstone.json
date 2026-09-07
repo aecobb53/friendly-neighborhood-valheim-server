@@ -4,6 +4,13 @@
   "display_name": "RockandStone",
   "expected": true,
   "description": "Main Valheim server",
-  "news": [],
-  "rules": []
+  "news": [
+    "Reviving the server for 1.0!!"
+  ],
+  "rules": [
+    "Have fun!",
+    "Be kind and respectful to everyone in the community.",
+    "Try to add more to the server than you take.",
+    "Encourage and celebrate."
+  ]
 }

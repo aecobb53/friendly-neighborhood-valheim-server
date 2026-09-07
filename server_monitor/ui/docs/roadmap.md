@@ -505,24 +505,6 @@ When an implementation task is completed:
 
 The project should always remain in a deployable state.
 
-# Upcoming ideas
-
-Polls
-    add who is playing tonight and could even check off who is on or hopped on
-maybe even a timeline of who is hopping on when or available when. Like a timeline view of availability
-Guides and how to with easy links. Like a community wiki
-optomize for mobile
-
-# Current things I notice could be fixed up
-the feed should filter by game
-the carousel should filter by page as well
-Im prove the log messaging
-touch up server rules
-actually implement Recent news on server page
-links between page content like events to requests etc.
-external links for pages
-Response order of some stuff could be better like events baesd on time, requests by urgency
-
 # Completed updates
 
 2026-07-30
@@ -559,9 +541,6 @@ Implemented behavior:
 * Poll cards now show type-specific result details for ranked choice, availability, rating, and text response poll types.
 * Closed polls always render result content, including a no-responses message when applicable.
 * Poll card Copy Link now uses icon-style action consistent with other cards.
-<!-- 
-In the ui, any dropdown has a white background and white text. Only when highlighted can I see what the options are. Can you 
-Add a link to gallery images -->
 
 2026-08-04
 Finalized Polls backend summary payload and UI consumption.
@@ -572,3 +551,35 @@ Implemented behavior:
 * Added 10-second poll refresh to keep poll cards and open poll modal results current.
 * Closed polls continue showing options and results while response inputs remain disabled.
 
+
+# Current running list of tiny tweaks
+
+
+# Upcoming ideas
+
+Polls
+    add who is playing tonight and could even check off who is on or hopped on
+maybe even a timeline of who is hopping on when or available when. Like a timeline view of availability
+Guides and how to with easy links. Like a community wiki
+optomize for mobile
+
+
+# Current things I notice could be fixed up
+- [ ] the feed should filter by game
+- [ ] the carousel should filter by page as well
+- [ ] Im prove the log messaging
+- [ ] touch up server rules
+- [x] actually implement Recent news on server page
+- [x] links between page content like events to requests etc.
+- [x] external links for pages
+- [ ] Response order of some stuff could be better like events baesd on time, requests by urgency
+
+# Completed updates
+
+2026-08-04
+Improved modal scroll behavior, dropdown readability, and gallery reference-link copying.
+
+Implemented behavior:
+* Event detail modal now keeps stable, visible scroll behavior for long content.
+* Global dropdown option contrast is fixed (dark background with readable text).
+* Gallery detail viewer now includes an icon action to copy the direct image link for reference.

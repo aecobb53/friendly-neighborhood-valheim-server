@@ -47,6 +47,8 @@ def server_status() -> ResponseObject:
         for server in game_servers:
             if not len(server['server_status_list']):
                 continue
+            if server['server_name'] == "Unknown Server Name":
+                continue
             current_status = server['latest_status']
             game_payload['servers'].append({
                 "id": server['container_id'],
@@ -134,14 +136,9 @@ def server_news(server_name: str) -> ResponseObject:
 @router.get('/servers/{server_name}/rules', status_code=200)
 def server_rules(server_name: str) -> ResponseObject:
     server_info = find_game_info(server_name=server_name)
-    # response = [
-    #     "Be respectful in shared areas.",
-    #     "Label portal destinations clearly.",
-    #     "Ask before modifying another player's build."
-    # ]
     return {
         "success": True,
-        "data": server_info['news']
+        "data": server_info['rules']
     }
 
 # @router.get('/servers/{server_name}/logs', status_code=200)
