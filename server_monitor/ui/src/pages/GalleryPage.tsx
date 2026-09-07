@@ -25,6 +25,8 @@ interface ServerStatusResponse {
   games: ServerGroup[];
 }
 
+const REFRESH_MS = Number(import.meta.env.VITE_PAGE_REFRESH_MS ?? 15000);
+
 function createEmptyForm(server = ''): CreateGalleryForm {
   return { server, title: '', description: '' };
 }
@@ -136,8 +138,10 @@ export default function GalleryPage() {
     let cancelled = false;
     autoOpenAttempted.current = false;
 
-    async function loadGallery() {
-      setLoading(true);
+    async function loadGallery(showLoading = false) {
+      if (showLoading) {
+        setLoading(true);
+      }
 
       const query = new URLSearchParams();
       if (serverParam) query.set('server', serverParam);
@@ -180,10 +184,18 @@ export default function GalleryPage() {
       }
     }
 
-    loadGallery();
+    loadGallery(true);
     loadAvailableServers();
 
-    return () => { cancelled = true; };
+    const interval = window.setInterval(() => {
+      void loadGallery();
+      void loadAvailableServers();
+    }, REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, [serverParam]);
 
   // Auto-open detail modal when ?id= is present and items have loaded

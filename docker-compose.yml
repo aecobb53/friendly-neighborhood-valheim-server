@@ -39,6 +39,8 @@ services:
         Marlthon-OdinShip-0.7.8
         OdinPlus-OdinsUndercroft-1.3.3
         OdinPlus-OdinArchitect-1.7.0
+        BentoG-MissingPieces-2.2.3
+        Vismeneer-MoreMissingPieces-1.1.0
     build:
       context: .
       dockerfile: ./Dockerfile

@@ -41,6 +41,8 @@ function mapCarouselItems(items: CarouselApiItem[]): CarouselSlide[] {
     .filter((slide) => Boolean(slide.alt));
 }
 
+const REFRESH_MS = Number(import.meta.env.VITE_PAGE_REFRESH_MS ?? 15000);
+
 export default function ServerOverviewPage() {
   const { name } = useParams<{ name: string }>();
   const location = useLocation();
@@ -56,7 +58,11 @@ export default function ServerOverviewPage() {
   useEffect(() => {
     let cancelled = false;
 
-    async function loadServer() {
+    async function loadServer(showLoading = false) {
+      if (showLoading) {
+        setLoading(true);
+      }
+
       if (!name) {
         if (!cancelled) {
           setError('No server was selected.');
@@ -81,10 +87,14 @@ export default function ServerOverviewPage() {
       setLoading(false);
     }
 
-    loadServer();
+    loadServer(true);
+    const interval = window.setInterval(() => {
+      void loadServer();
+    }, REFRESH_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
   }, [name]);
 
@@ -114,8 +124,13 @@ export default function ServerOverviewPage() {
 
     loadServerRules();
 
+    const interval = window.setInterval(() => {
+      void loadServerRules();
+    }, REFRESH_MS);
+
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
   }, [name]);
 
@@ -145,8 +160,13 @@ export default function ServerOverviewPage() {
 
     loadServerNews();
 
+    const interval = window.setInterval(() => {
+      void loadServerNews();
+    }, REFRESH_MS);
+
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
   }, [name]);
 
@@ -169,8 +189,13 @@ export default function ServerOverviewPage() {
 
     loadCarousel();
 
+    const interval = window.setInterval(() => {
+      void loadCarousel();
+    }, REFRESH_MS);
+
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
   }, [location.pathname]);
 

@@ -68,6 +68,8 @@ const NAV_CARDS = [
   { to: '/servers', label: 'Servers', icon: '⚔', description: 'View all game servers and their current status.' },
 ];
 
+const REFRESH_MS = Number(import.meta.env.VITE_PAGE_REFRESH_MS ?? 15000);
+
 export default function HomePage() {
   usePageTitle();
   const location = useLocation();
@@ -105,8 +107,13 @@ export default function HomePage() {
 
     loadHomeContent();
 
+    const interval = window.setInterval(() => {
+      void loadHomeContent();
+    }, REFRESH_MS);
+
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
   }, [location.pathname]);
 

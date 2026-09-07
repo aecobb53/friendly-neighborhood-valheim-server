@@ -36,6 +36,8 @@ interface ServerStatusResponse {
   games: ServerGroup[];
 }
 
+const REFRESH_MS = Number(import.meta.env.VITE_PAGE_REFRESH_MS ?? 15000);
+
 function createEmptyForm(server = ''): CreateEventForm {
   return {
     server,
@@ -199,8 +201,10 @@ export default function EventsPage() {
     let cancelled = false;
     autoOpenAttempted.current = false;
 
-    async function loadEvents() {
-      setLoading(true);
+    async function loadEvents(showLoading = false) {
+      if (showLoading) {
+        setLoading(true);
+      }
 
       const query = new URLSearchParams();
       if (serverParam) query.set('server', serverParam);
@@ -247,10 +251,18 @@ export default function EventsPage() {
       }
     }
 
-    loadEvents();
+    loadEvents(true);
     loadAvailableServers();
 
-    return () => { cancelled = true; };
+    const interval = window.setInterval(() => {
+      void loadEvents();
+      void loadAvailableServers();
+    }, REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, [serverParam]);
 
   // Auto-open detail modal when ?id= is present and events have loaded

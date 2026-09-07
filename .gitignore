@@ -4,6 +4,8 @@ server_monitor/monitor/storage
 server_monitor/shared/states
 server_backup.files
 server_monitor/errors/
+server_monitor/api/content/
+!server_monitor/api/content/servers
 
 main/**
 !main/server/

@@ -49,6 +49,8 @@ interface ServerStatusResponse {
   games: ServerGroup[];
 }
 
+const REFRESH_MS = Number(import.meta.env.VITE_PAGE_REFRESH_MS ?? 15000);
+
 type ApiUrgency = 'URGENT' | 'SOON' | 'WHENEVER';
 
 function createEmptyForm(server = ''): CreateRequestForm {
@@ -252,8 +254,10 @@ export default function RequestsPage() {
   useEffect(() => {
     let cancelled = false;
 
-    async function loadRequests() {
-      setLoading(true);
+    async function loadRequests(showLoading = false) {
+      if (showLoading) {
+        setLoading(true);
+      }
 
       const response = await api.get<RequestItem[] | { requests?: RequestItem[]; items?: RequestItem[]; data?: RequestItem[] }>('/requests');
 
@@ -302,11 +306,17 @@ export default function RequestsPage() {
         }
     }
 
-    loadRequests();
+    loadRequests(true);
     loadAvailableServers();
+
+    const interval = window.setInterval(() => {
+      void loadRequests();
+      void loadAvailableServers();
+    }, REFRESH_MS);
 
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
   }, []);
 

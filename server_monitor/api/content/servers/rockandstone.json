@@ -3,9 +3,10 @@
   "game": "Valheim",
   "display_name": "RockandStone",
   "expected": true,
-  "description": "Main Valheim server",
+  "description": "Main Valheim server\nCurrent mod code: 01a079e3-4364-0971-e4e8-2c37c80e5f84",
   "news": [
-    "Reviving the server for 1.0!!"
+    "Reviving the server for 1.0!!",
+    "Castle is open! Claim a room if you have not yet."
   ],
   "rules": [
     "Have fun!",

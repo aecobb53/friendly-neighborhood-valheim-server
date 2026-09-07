@@ -21,6 +21,7 @@ interface MapData {
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 8;
 const ZOOM_SENSITIVITY = 0.001;
+const REFRESH_MS = Number(import.meta.env.VITE_PAGE_REFRESH_MS ?? 15000);
 
 function ResetIcon() {
   return (
@@ -118,8 +119,10 @@ export default function MapsPage() {
       return names[0] ?? null;
     }
 
-    async function loadMap() {
-      setLoading(true);
+    async function loadMap(showLoading = false) {
+      if (showLoading) {
+        setLoading(true);
+      }
       setError(null);
 
       const server = await resolveServer();
@@ -143,8 +146,14 @@ export default function MapsPage() {
       setLoading(false);
     }
 
-    loadMap();
-    return () => { cancelled = true; };
+    loadMap(true);
+    const interval = window.setInterval(() => {
+      void loadMap();
+    }, REFRESH_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, [serverParam]);
 
   // ── Zoom toward cursor ────────────────────────
