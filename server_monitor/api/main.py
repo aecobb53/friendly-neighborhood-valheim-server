@@ -1,66 +1,126 @@
 from pathlib import Path
 import json
 from datetime import datetime, timezone
+import random
+from typing import Annotated
 
-from fastapi import FastAPI, Request
+import yaml
+from pydantic import BaseModel
+
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 
+import logging
+from core.set_logger import set_logger
+set_logger()
+logger = logging.getLogger(__name__)
+
 app = FastAPI()
 
 DATA_DIR = Path("/app/storage")
+SERVERS_DIR = Path("/app/servers")
+
+from common.exceptions import ServerNotFoundError
+
+from routes.servers.route import router as service_router
+from routes.requests.route import router as requests_router
+from routes.events.route import router as event_router
+from routes.polls.route import router as polls_router
+from routes.gallery.route import gallery_router, map_router
+from core.exception_handler import server_not_found
+from common.utils import CONTENT_DIR
+
+app.include_router(service_router)
+app.include_router(requests_router)
+app.include_router(event_router)
+app.include_router(polls_router)
+app.include_router(gallery_router)
+app.include_router(map_router)
+app.add_exception_handler(ServerNotFoundError, server_not_found)
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-    )
-
-@app.get('/api/server-status')
-def server_status():
-    response = {
-        "games": [],
-        "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+@app.get('/api/feed', status_code=200)
+@app.get('/api/feed/{page}', status_code=200)
+def feed(page: str | None = None):
+    response = []
+    with open(CONTENT_DIR / 'feed.yaml', 'r') as file:
+        data = yaml.safe_load(file)
+        for _, section in data.items():
+            for _, feed_item in section.items():
+                response.extend(feed_item)
+    random.shuffle(response)
+    return {
+        "success": True,
+        "data": response
     }
 
-    servers = {}
+@app.get('/api/whats-new', status_code=200)
+def whats_new():
+    response = [
+    "New Website",
+    "Valheim is coming back",
+    "New Valheim server: Hellheim - More to come!"
+    ]
+    return {
+        "success": True,
+        "data": response
+    }
 
-    for file in DATA_DIR.glob("*.json"):
-        with open(file) as f:
-            server_info = json.load(f)
-            if server_info['container_status'] not in ['running']:
-                continue
-            game_name = server_info['game_name']
-            if game_name not in servers:
-                servers[game_name] = []
-            servers[game_name].append(server_info)
+@app.get('/api/carousel', status_code=200)
+@app.get('/api/carousel/{page}', status_code=200)
+def carousel(page: str | None = None):
+    print(f"PAGE: {page}")
+    response = [
+        {
+            "id": "home-1",
+            "image": "/static/images/carousel/Valheim.png",
+            "alt": "Community build at sunset",
+            "title": "RockandStone server is back!",
+            "subtitle": "Restart our journey in Valheim.",
+            "href": "/servers"
+        },
+        {
+            "id": "home-2",
+            "image": "/static/images/carousel/Valheim.png",
+            "alt": "Another page",
+            "title": "Hellheim",
+            "subtitle": "There is a new server we're considering supporting! Hardcore mode coming to you!",
+            "href": "/servers"
+        },
+        {
+            "id": "home-3",
+            "image": "/api/gallery/gal-007/media/Fader",
+            "alt": "Another page",
+            "title": "When do we take on Fader?",
+            "subtitle": "The fight for the Ashlands is upon us!.",
+            "href": "/servers"
+        },
+        {
+            "id": "home-4",
+            "image": "/static/images/carousel/Minecraft.png",
+            "alt": "Another page",
+            "title": "Do we want to start a Minecraft server?",
+            "subtitle": "There were some talks about this if anybody is interested.",
+            "href": "/servers"
+        },
+        {
+            "id": "home-5",
+            "image": "/static/images/carousel/Windrose.png",
+            "alt": "Another page",
+            "title": "Windrose",
+            "subtitle": "Windrose is similar to Valheim, we could look into hosting that as another game.",
+            "href": "/servers"
+        },
 
-    for game, game_servers in servers.items():
-        game_payload = {
-            "name": game,
-            "image": "SERVER IIMAGE",
-            "servers": [],
-        }
-        for server in game_servers:
-            if not len(server['server_status_list']):
-                continue
-            current_status = server['server_status_list'][-1]
-            game_payload['servers'].append({
-                "id": server['container_id'],
-                "name": server['server_name'],
-                "container_status": server['container_status'],
-                "server_status": current_status['status'],
-                "healthy": True,
-                "last_message": current_status['message'],
-                "updated": current_status['timestamp'],
-            })
-        response['games'].append(game_payload)
-    return response
+    ]
+    return {
+        "success": True,
+        "data": response
+    }

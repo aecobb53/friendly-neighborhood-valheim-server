@@ -20,7 +20,8 @@ services:
       AUTO_BACKUP_DAYS_TO_LIVE: 1
       AUTO_BACKUP_PAUSE_WITH_NO_PLAYERS: 1
       TYPE: BepInEx
-      MODS: denikson-BepInExPack_Valheim-5.4.2333
+      MODS:
+        denikson-BepInExPack_Valheim-5.4.2333
         Roses-SmarterContainers-1.7.0
         ishid4-BetterArchery-1.9.82
         Tekla-AutoRepair-5.4.1602
@@ -31,7 +32,15 @@ services:
         RustyMods-Seasonality-3.8.0
         TastyChickenLegs-TimedTorchesStayLit-1.3.9
         ValheimModding-YamlDotNet-16.3.1
-        #  Nextek-SpeedyPaths-1.0.9
+        ValheimModding-Jotunn-2.29.2
+        MathiasDecrock-PlanBuild-0.18.4
+        JereKuusela-Server_devcommands-1.109.0
+        JoelOliMclean-NoRainDamage-1.2.4
+        Marlthon-OdinShip-0.7.8
+        OdinPlus-OdinsUndercroft-1.3.3
+        OdinPlus-OdinArchitect-1.7.0
+        BentoG-MissingPieces-2.2.3
+        Vismeneer-MoreMissingPieces-1.1.0
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -100,3 +109,55 @@ services:
       server_monitor.enabled: "true"
       server_monitor.parser: "valheim"
       server_monitor.server_name: "Hellheim"
+
+  testheim:
+    image: mbround18/valheim:3
+    env_file:
+      - .env
+    environment:
+      PORT: 2456
+      PUBLIC: 0
+      NAME: "Testheim"
+      TZ: "UTC"
+      WORLD: "Testheim"
+      PRESET: Normal
+      # MODIFIERS: combat=varyhard,deathpenalty=casual,resourcerate=x3,raidrate=muchmore,portals=normal
+      AUTO_UPDATE: 1
+      UPDATE_ON_START: 0
+      AUTO_UPDATE_SCHEDULE: "0 11 * * *"
+      AUTO_UPDATE_PAUSE_WITH_PLAYER: 1
+      AUTO_BACKUP: 1
+      AUTO_BACKUP_ON_UPDATE: 1
+      AUTO_BACKUP_SCHEDULE: 0 * * * *
+      AUTO_BACKUP_DAYS_TO_LIVE: 1
+      AUTO_BACKUP_PAUSE_WITH_NO_PLAYERS: 1
+      TYPE: BepInEx
+      MODS: denikson-BepInExPack_Valheim-5.4.2333
+        Roses-SmarterContainers-1.7.0
+        ishid4-BetterArchery-1.9.82
+        Tekla-AutoRepair-5.4.1602
+        Advize-PlantEverything-1.20.0
+        BetterUI_ForeverMaintained-BetterUI_ForeverMaintained-2.5.9
+        Grizzzly-CraftFromContainers-3.8.1
+        RandyKnapp-ImprovedBuildHud-1.0.8
+        RustyMods-Seasonality-3.8.0
+        TastyChickenLegs-TimedTorchesStayLit-1.3.9
+        ValheimModding-YamlDotNet-16.3.1
+        #  Nextek-SpeedyPaths-1.0.9
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: testheim
+    ports:
+      - "4456:2456/udp"
+      - "4457:2457/udp"
+      - "4458:2458/udp"
+    volumes:
+      - ${SAVES_DIR}/test_server/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ./test_server/server:/home/steam/valheim
+      - ${BACKUP_DIR}/test_server/backups:/home/steam/backups
+    restart: unless-stopped
+    labels:
+      server_monitor.enabled: "true"
+      server_monitor.parser: "valheim"
+      server_monitor.server_name: "Testheim"
