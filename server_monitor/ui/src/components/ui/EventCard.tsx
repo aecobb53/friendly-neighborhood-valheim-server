@@ -1,5 +1,6 @@
 import Card from './Card';
 import MarkdownText from './MarkdownText';
+import TrustedExternalLink from './TrustedExternalLink';
 import styles from './EventCard.module.css';
 
 export interface EventItem {
@@ -158,14 +159,14 @@ export default function EventCard({ event, onOpen, onCopyLink, onEdit, copied }:
             <p className={styles.quickLinksTitle}>Quick Links</p>
             <div className={styles.linkGrid}>
               {quickLinks.map((link) => (
-                <a
+                <TrustedExternalLink
                   key={`${event.id}-${link.display}-${link.url}`}
                   href={link.url}
                   className={styles.linkCard}
                   onClick={(e) => e.stopPropagation()}
                 >
                   {link.display}
-                </a>
+                </TrustedExternalLink>
               ))}
             </div>
           </div>

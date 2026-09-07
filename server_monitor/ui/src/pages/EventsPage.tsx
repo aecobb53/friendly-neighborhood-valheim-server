@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
 import MarkdownText from '@/components/ui/MarkdownText';
+import TrustedExternalLink from '@/components/ui/TrustedExternalLink';
 import { Button, Card, LoadingState, PageHeader } from '@/components/ui';
 import EventCard, { formatEventSchedule } from '@/components/ui/EventCard';
 import type { EventItem } from '@/components/ui/EventCard';
@@ -417,13 +418,13 @@ export default function EventsPage() {
                 <h3 className={styles.quickLinksTitle}>Quick Links</h3>
                 <div className={styles.quickLinksGrid}>
                   {(selectedEvent.quick_links ?? []).map((link) => (
-                    <a
+                    <TrustedExternalLink
                       key={`${selectedEvent.id}-${link.display}-${link.url}`}
                       href={link.url}
                       className={styles.quickLinkCard}
                     >
                       {link.display}
-                    </a>
+                    </TrustedExternalLink>
                   ))}
                 </div>
               </div>

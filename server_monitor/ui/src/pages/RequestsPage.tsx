@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '@/api/client';
 import MarkdownText from '@/components/ui/MarkdownText';
+import TrustedExternalLink from '@/components/ui/TrustedExternalLink';
 import { Button, Card, LoadingState, PageHeader } from '@/components/ui';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import styles from './RequestsPage.module.css';
@@ -467,13 +468,13 @@ export default function RequestsPage() {
                   <p className={styles.quickLinksTitle}>Quick Links</p>
                   <div className={styles.quickLinksGrid}>
                     {(request.quick_links ?? []).map((link) => (
-                      <a
+                      <TrustedExternalLink
                         key={`${request.id}-${link.display}-${link.url}`}
                         href={link.url}
                         className={styles.quickLinkCard}
                       >
                         {link.display}
-                      </a>
+                      </TrustedExternalLink>
                     ))}
                   </div>
                 </div>
