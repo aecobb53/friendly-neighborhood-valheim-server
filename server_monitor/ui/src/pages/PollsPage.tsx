@@ -89,6 +89,19 @@ interface PollResponsePayload {
   availability_windows: Array<{ day: string; start: string; end: string; kind: string }>;
 }
 
+interface PollResponseItem {
+  id: string;
+  poll_id: string;
+  user_id: string | null;
+  choice_ids: string[];
+  rankings: string[];
+  rating: number | null;
+  text: string | null;
+  availability_windows: Array<{ day: string; start: string; end: string; kind: string }>;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 interface PollResponseForm {
   user_id: string;
   choice_ids: string[];
@@ -213,6 +226,10 @@ export default function PollsPage() {
 
   const [selectedPoll, setSelectedPoll] = useState<PollItem | null>(null);
   const [responseForm, setResponseForm] = useState<PollResponseForm>(createEmptyResponseForm());
+  const [showResponseBreakdown, setShowResponseBreakdown] = useState(false);
+  const [responseBreakdown, setResponseBreakdown] = useState<PollResponseItem[] | null>(null);
+  const [loadingResponseBreakdown, setLoadingResponseBreakdown] = useState(false);
+  const [responseBreakdownError, setResponseBreakdownError] = useState<string | null>(null);
 
   const requiresOptions = useMemo(
     () => form.poll_type === 'single_choice' || form.poll_type === 'multi_choice' || form.poll_type === 'ranked_choice',
@@ -320,14 +337,57 @@ export default function PollsPage() {
     setSelectedPoll(poll);
     setResponseForm(createEmptyResponseForm());
     setFeedback(null);
+    setShowResponseBreakdown(false);
+    setResponseBreakdown(null);
+    setResponseBreakdownError(null);
   }
 
   function closeResponseModal() {
     setSelectedPoll(null);
     setResponseForm(createEmptyResponseForm());
+    setShowResponseBreakdown(false);
+    setResponseBreakdown(null);
+    setResponseBreakdownError(null);
     if (idFilter) {
       setSearchParams({});
     }
+  }
+
+  async function toggleResponseBreakdown() {
+    if (!selectedPoll || selectedPoll.anonymous_responses) {
+      return;
+    }
+
+    if (showResponseBreakdown) {
+      setShowResponseBreakdown(false);
+      return;
+    }
+
+    if (responseBreakdown === null) {
+      setLoadingResponseBreakdown(true);
+      setResponseBreakdownError(null);
+
+      const response = await api.get<PollResponseItem[] | { data?: PollResponseItem[]; responses?: PollResponseItem[] }>(`/polls/responses?poll_id=${selectedPoll.id}`);
+      if (!response.success) {
+        setResponseBreakdownError(response.error.message);
+        setLoadingResponseBreakdown(false);
+        return;
+      }
+
+      const payload = response.data;
+      const list = Array.isArray(payload)
+        ? payload
+        : Array.isArray((payload as { responses?: PollResponseItem[] }).responses)
+          ? (payload as { responses: PollResponseItem[] }).responses
+          : Array.isArray((payload as { data?: PollResponseItem[] }).data)
+            ? (payload as { data: PollResponseItem[] }).data
+            : [];
+
+      setResponseBreakdown(list);
+      setLoadingResponseBreakdown(false);
+    }
+
+    setShowResponseBreakdown(true);
   }
 
   function copyPollLink(pollId: string) {
@@ -337,6 +397,74 @@ export default function PollsPage() {
       setTimeout(() => setCopiedPollId(null), 2000);
     });
   }
+
+  const responseBreakdownGroups = useMemo(() => {
+    if (!selectedPoll || !responseBreakdown) {
+      return [] as Array<{ label: string; entries: string[] }>;
+    }
+
+    const formatUser = (response: PollResponseItem) => response.user_id?.trim() || 'Anonymous';
+
+    if (selectedPoll.poll_type === 'single_choice' || selectedPoll.poll_type === 'multi_choice' || selectedPoll.poll_type === 'ranked_choice') {
+      return selectedPoll.options.map((option) => {
+        const entries: string[] = [];
+
+        responseBreakdown.forEach((response) => {
+          if (selectedPoll.poll_type === 'ranked_choice') {
+            response.rankings.forEach((rankedOptionId, index) => {
+              if (rankedOptionId === option.id) {
+                entries.push(`${formatUser(response)} (#${index + 1})`);
+              }
+            });
+            return;
+          }
+
+          if (response.choice_ids.includes(option.id)) {
+            entries.push(formatUser(response));
+          }
+        });
+
+        return {
+          label: option.label,
+          entries,
+        };
+      });
+    }
+
+    if (selectedPoll.poll_type === 'rating') {
+      return [1, 2, 3, 4, 5].map((rating) => {
+        const entries = responseBreakdown
+          .filter((response) => response.rating === rating)
+          .map((response) => formatUser(response));
+
+        return {
+          label: `Rating ${rating}`,
+          entries,
+        };
+      });
+    }
+
+    if (selectedPoll.poll_type === 'availability') {
+      const windowMap = new Map<string, string[]>();
+
+      responseBreakdown.forEach((response) => {
+        const user = formatUser(response);
+        response.availability_windows.forEach((window) => {
+          const label = `${window.day} ${window.start}-${window.end} (${window.kind})`;
+          const entries = windowMap.get(label) ?? [];
+          entries.push(user);
+          windowMap.set(label, entries);
+        });
+      });
+
+      return Array.from(windowMap.entries()).map(([label, entries]) => ({ label, entries }));
+    }
+
+    return responseBreakdown.map((response) => ({
+      label: formatUser(response),
+      entries: [response.text?.trim() || 'No text provided.'],
+    }));
+  }, [responseBreakdown, selectedPoll]);
 
   function toggleChoice(optionId: string) {
     if (!selectedPoll) {
@@ -823,6 +951,40 @@ export default function PollsPage() {
               )}
 
               <p className={styles.helperText}>{selectedPoll.summary.total_responses} total responses</p>
+
+              {!selectedPoll.anonymous_responses && (
+                <div className={styles.breakdownSection}>
+                  <Button type="button" variant="ghost" size="sm" onClick={toggleResponseBreakdown}>
+                    {showResponseBreakdown ? 'Hide Results' : 'Show Results'}
+                  </Button>
+
+                  {loadingResponseBreakdown && <p className={styles.helperText}>Loading voter breakdown...</p>}
+                  {responseBreakdownError && <p className={styles.breakdownError}>{responseBreakdownError}</p>}
+
+                  {showResponseBreakdown && responseBreakdown && !loadingResponseBreakdown && !responseBreakdownError && (
+                    responseBreakdownGroups.length > 0 ? (
+                      <div className={styles.breakdownList}>
+                        {responseBreakdownGroups.map((group) => (
+                          <div key={group.label} className={styles.breakdownGroup}>
+                            <p className={styles.breakdownLabel}>{group.label}</p>
+                            {group.entries.length > 0 ? (
+                              <ul className={styles.breakdownEntries}>
+                                {group.entries.map((entry) => (
+                                  <li key={entry}>{entry}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className={styles.helperText}>No responses for this result yet.</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className={styles.helperText}>No detailed responses available yet.</p>
+                    )
+                  )}
+                </div>
+              )}
             </div>
 
             <form className={styles.form} onSubmit={handleSubmitResponse}>

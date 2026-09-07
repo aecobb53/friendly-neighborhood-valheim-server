@@ -109,6 +109,7 @@ class PollResponseDataObject(BaseModel):
     id: str | None = None
     poll_id: str
     user_id: str | None = None
+    # user_id: str | None = None
     choice_ids: list[str] = Field(default_factory=list)
     rankings: list[str] = Field(default_factory=list)
     rating: int | None = None

@@ -99,7 +99,7 @@ At the completion of this phase users should be able to:
 
 ## Task 1.1 - Project Foundation
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 
@@ -132,7 +132,7 @@ Create the frontend foundation.
 
 ## Task 1.2 - Navbar
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: S
 
@@ -161,7 +161,7 @@ Implement the primary application navigation.
 
 ## Task 1.3 - Shared UI Components
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 
@@ -187,7 +187,7 @@ Future tasks should reuse these components rather than creating page-specific im
 
 ## Task 1.4 - Server Card
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: S
 
@@ -207,7 +207,7 @@ Reusable Server Card component.
 
 ## Task 1.5 - Status Badge
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: XS
 
@@ -231,7 +231,7 @@ Supported states:
 
 ## Task 1.6 - News Ticker
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: S
 
@@ -253,7 +253,7 @@ Initially support:
 
 ## Task 1.7 - Home Page
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: M
 
@@ -272,7 +272,7 @@ Reference:
 
 ## Task 1.8 - Servers Dashboard
 
-Status: ☐ Not Started
+Status: ☑ Complete
 
 Effort: S
 

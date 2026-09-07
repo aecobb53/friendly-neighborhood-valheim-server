@@ -26,7 +26,7 @@ def _ensure_storage_dirs() -> None:
 def _next_id(prefix: str, pattern_glob: str, directory) -> str:
     id_number = 0
     for existing_file in directory.glob(pattern_glob):
-        match = re.match(rf".*{prefix}-(\\d+)\\.json", str(existing_file))
+        match = re.match(rf".*{prefix}-(\d+)\.json", str(existing_file))
         if match:
             id_number = max(id_number, int(match.group(1)))
     id_number += 1
