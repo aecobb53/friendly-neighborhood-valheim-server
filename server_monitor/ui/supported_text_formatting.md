@@ -23,6 +23,8 @@
 - Literal new lines are preserved in rendered output.
 - Colored text names: `red`, `green`, `blue`, `orange`, `yellow`, `white`, `black`, `purple`, `poor`, `common`, `uncommon`, `rare`, `epic`, `legendary`, `ancient`, `mythic`.
 - Highlight names: `yellow`, `green`, `blue`, `red`, `orange`.
+- Links are trusted only for `nax.lol`, `valheim.fandom.com`, `discord.com`, and `store.steampowered.com` domains (including subdomains).
+- Non-trusted links remain visible and get a `Not trusted` indicator.
 
 ## Supported Color Tokens
 

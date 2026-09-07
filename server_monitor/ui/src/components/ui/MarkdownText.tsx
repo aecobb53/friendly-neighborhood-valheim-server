@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
+import { classifyLinkHref } from '@/utils/linkTrust';
 import styles from './MarkdownText.module.css';
 
 interface MarkdownTextProps {
@@ -150,14 +151,37 @@ export default function MarkdownText({ content, className = '' }: MarkdownTextPr
         skipHtml
         components={{
           a: ({ href, children }) => {
-            if (!href || !isSafeHref(href)) {
-              return <span>{children}</span>;
+            if (!href) {
+              return (
+                <span className={styles.untrustedInline}>
+                  <span>{children}</span>
+                  <span className={styles.untrustedBadge}>Not trusted</span>
+                </span>
+              );
             }
 
+            const verdict = classifyLinkHref(href);
+
+            if (!isSafeHref(href) || !verdict.clickable) {
+              return (
+                <span className={styles.untrustedInline}>
+                  <span>{children}</span>
+                  <span className={styles.untrustedBadge}>Not trusted</span>
+                </span>
+              );
+            }
+
+            const linkClass = verdict.trusted
+              ? styles.link
+              : `${styles.link} ${styles.linkUntrusted}`;
+
             return (
-              <a href={href} className={styles.link} rel="noreferrer noopener" target="_blank">
-                {children}
-              </a>
+              <span className={styles.linkWrap}>
+                <a href={href} className={linkClass} rel="noreferrer noopener" target="_blank">
+                  {children}
+                </a>
+                {!verdict.trusted && <span className={styles.untrustedBadge}>Not trusted</span>}
+              </span>
             );
           },
           code: ({ children }) => <code className={styles.inlineCode}>{children}</code>,
