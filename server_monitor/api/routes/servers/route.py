@@ -141,15 +141,80 @@ def server_rules(server_name: str) -> ResponseObject:
         "data": server_info['rules']
     }
 
-# @router.get('/servers/{server_name}/logs', status_code=200)
-# def server_logs(server_name: str, limit: int = 50):
-#     raise ValueError('This actually got run??')
-#     response = [
-#         "[19:01:21] World saved",
-#         "[18:59:02] Player Maya joined",
-#         "[18:43:17] Boss defeated"
-#     ][:limit]
+# ##############################################
+# import os
+# import secrets
+# from secrets import compare_digest
+
+# from fastapi import APIRouter, Depends, HTTPException, Request, Response
+# from pydantic import BaseModel
+
+
+# ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+
+# # Simple in-memory session storage for now.
+# admin_sessions: set[str] = set()
+# # TODO: improve to add a timeout and persist between server restarts
+# # TODO: Add cookie experation
+# # TODO: Add rate limiting
+
+# class AdminLogin(BaseModel):
+#     password: str
+
+# def validate_admin_session(session_token: str) -> bool:
+#     return session_token in admin_sessions
+
+# def require_admin(request: Request) -> None:
+#     session_token = request.cookies.get("admin_session")
+
+#     if not session_token or not validate_admin_session(session_token):
+#         raise HTTPException(status_code=401, detail="Authentication required")
+
+# auth_router = APIRouter(prefix="/admin-auth", tags=["admin", 'auth'])
+# admin_router = APIRouter(
+#     prefix="/api/admin",
+#     tags=['server', 'admin'],
+#     dependencies=[Depends(require_admin)],
+# )
+
+# @auth_router.post("/login", status_code=200)
+# def admin_login(payload: AdminLogin, response: Response) -> ResponseObject:
+#     if not compare_digest(payload.password, ADMIN_PASSWORD):
+#         raise HTTPException(status_code=404)  # Yes I know this is intentional. 
+#         # raise HTTPException(status_code=401, detail="Invalid password")
+
+#     session_token = secrets.token_urlsafe(32)
+#     admin_sessions.add(session_token)
+
+#     response.set_cookie(
+#         key="admin_session",
+#         value=session_token,
+#         secure=True,
+#         httponly=True,
+#         samesite="strict",
+#     )
+
 #     return {
 #         "success": True,
-#         "data": response
+#         "data": None,
 #     }
+
+# @admin_router.put("/servers/{server_name}/news", status_code=200)
+# def update_server_news(
+#     server_name: str,
+#     payload: NewsUpdate,
+# ) -> ResponseObject:
+#     server_info = find_game_info(server_name=server_name)
+
+#     server_info["news"] = payload.news
+#     save_game_info(server_name, server_info)
+
+#     return {
+#         "success": True,
+#         "data": server_info["news"],
+#     }
+
+# def save_game_info(server_name: str, server_info: dict) -> None:
+#     server_file_path = SERVERS_DIR / f"{server_name}.json"
+#     with open(server_file_path, "w") as f:
+#         json.dump(server_info, f, indent=4)

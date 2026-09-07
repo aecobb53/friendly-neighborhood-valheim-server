@@ -112,6 +112,48 @@
   gap: 0.4rem;
 }
 
+.breakdownSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.breakdownError {
+  margin: 0;
+  color: #fca5a5;
+  font-size: 0.92rem;
+}
+
+.breakdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.breakdownGroup {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.breakdownLabel {
+  margin: 0;
+  color: #f4f4f5;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.breakdownEntries {
+  margin: 0.45rem 0 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #d1d5db;
+}
+
 .resultsTitle {
   margin: 0;
   font-size: 0.76rem;
