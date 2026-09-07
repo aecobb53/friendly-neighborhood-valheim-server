@@ -583,3 +583,23 @@ Implemented behavior:
 * Event detail modal now keeps stable, visible scroll behavior for long content.
 * Global dropdown option contrast is fixed (dark background with readable text).
 * Gallery detail viewer now includes an icon action to copy the direct image link for reference.
+
+2026-09-07
+Implemented first-pass mobile responsiveness for scoped pages.
+
+Implemented behavior:
+* Added shared mobile foundation updates: responsive navbar hamburger menu, tighter mobile container spacing, and global horizontal overflow guards.
+* Optimized Main and Servers Dashboard pages for phone widths using stacking/wrapping grids and improved text overflow handling.
+* Optimized Individual Server and Events pages for mobile with stacked layouts, responsive quick-link sections, and improved modal/form behavior.
+* Updated the mobile implementation checklist in `mobile_ui_style.md` with Phases 1-3 complete and Phase 4 pending visual verification.
+* Verified UI compiles successfully via production build.
+
+2026-09-07
+Implemented second-pass mobile responsiveness for remaining routed pages.
+
+Implemented behavior:
+* Added responsive layout and overflow protections for Requests, Polls, Gallery, Maps, and Not Found pages.
+* Improved mobile modal and form behavior on Requests, Polls, and Gallery pages (stacking, scrolling, action button layout).
+* Added mobile-focused map behavior including touch/pointer panning and pinch zoom support, plus responsive legend/control layouts.
+* Improved text wrapping and card usability for gallery/requests/polls content at narrow widths.
+* Verified UI compiles successfully via production build.

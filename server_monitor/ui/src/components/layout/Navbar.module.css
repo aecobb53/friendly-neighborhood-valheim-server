@@ -11,6 +11,7 @@
 .inner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 100%;
   max-width: var(--content-max-width);
   margin: 0 auto;
@@ -118,4 +119,124 @@
 .navLinkRight.navLinkActive {
   background: var(--color-accent-purple);
   color: #fff;
+}
+
+.menuButton {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--color-text-primary);
+}
+
+.menuButtonBar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.mobileMenu {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .inner {
+    padding: 0 var(--space-5);
+    gap: var(--space-4);
+  }
+
+  .centerLinks,
+  .navLinkRight {
+    display: none;
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
+  .mobileMenu {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    border-top: 1px solid transparent;
+    background: var(--color-bg-surface);
+    transition: max-height var(--transition-base), border-color var(--transition-base);
+  }
+
+  .mobileMenuOpen {
+    max-height: 70vh;
+    border-top-color: var(--color-border);
+  }
+
+  .mobileLinks {
+    list-style: none;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-5) var(--space-5);
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .mobileNavLink,
+  .mobileServersLink {
+    display: block;
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .mobileNavLink {
+    color: var(--color-text-secondary);
+    background: transparent;
+  }
+
+  .mobileNavLink:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-card);
+  }
+
+  .mobileNavLinkActive {
+    color: var(--color-accent-blue);
+    background: color-mix(in srgb, var(--color-accent-blue) 12%, transparent);
+  }
+
+  .mobileServersLink {
+    background: var(--color-accent-blue);
+    color: #fff;
+    text-align: center;
+  }
+
+  .mobileServersLink:hover {
+    background: var(--color-accent-blue-hover);
+    color: #fff;
+  }
+
+  .mobileServersLinkActive {
+    background: var(--color-accent-purple);
+  }
+}
+
+@media (max-width: 560px) {
+  .brandName {
+    font-size: var(--font-size-sm);
+  }
+
+  .inner {
+    padding: 0 var(--space-4);
+  }
+
+  .mobileLinks {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
 }

@@ -75,6 +75,7 @@
   color: #e5e7eb;
   line-height: 1.5;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .badges {
@@ -143,6 +144,7 @@
   font-size: 0.9rem;
   color: #d1d5db;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .footer {
@@ -242,6 +244,7 @@
 .modalTitle {
   margin: 0;
   color: #f4f4f5;
+  overflow-wrap: anywhere;
 }
 
 .closeButton {
@@ -331,6 +334,7 @@
   margin: 0;
   color: #9ca3af;
   font-size: 0.86rem;
+  overflow-wrap: anywhere;
 }
 
 .rankButton {
@@ -371,6 +375,50 @@
 }
 
 @media (max-width: 820px) {
+  .toolbar {
+    justify-content: stretch;
+  }
+
+  .toolbar > * {
+    width: 100%;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .badges {
+    width: 100%;
+  }
+
+  .modal {
+    width: calc(100% - 1.25rem);
+    max-height: calc(100vh - 1.25rem);
+    padding: 1rem;
+    border-radius: 0.85rem;
+  }
+
+  .resultRow,
+  .rankButton {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .resultValue,
+  .rankBadge {
+    white-space: normal;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .modalActions > * {
+    width: 100%;
+  }
+
   .fieldRow {
     grid-template-columns: 1fr;
   }
@@ -378,5 +426,23 @@
   .footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footerActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .overlay {
+    padding: 0.625rem;
+  }
+
+  .closeButton {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    font-size: 1.8rem;
+    line-height: 1;
   }
 }

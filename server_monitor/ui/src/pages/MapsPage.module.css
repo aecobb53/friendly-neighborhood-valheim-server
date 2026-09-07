@@ -17,6 +17,7 @@
   color: #9ca3af;
   line-height: 1.6;
   max-width: 65ch;
+  overflow-wrap: anywhere;
 }
 
 .lastUpdated {
@@ -100,6 +101,7 @@
   border: 1px solid var(--color-border-subtle);
   background: #020617;
   cursor: grab;
+  touch-action: none;
   user-select: none;
   aspect-ratio: 16 / 10;
 }
@@ -192,4 +194,63 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+@media (max-width: 900px) {
+  .mapSection {
+    grid-template-columns: 1fr;
+  }
+
+  .legend {
+    position: static;
+  }
+
+  .mapContainer {
+    aspect-ratio: 16 / 12;
+  }
+
+  .controls {
+    left: 0.75rem;
+    right: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .controlButton {
+    min-height: 2.15rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .root {
+    gap: 1rem;
+  }
+
+  .meta {
+    gap: 0.5rem;
+  }
+
+  .description {
+    font-size: 0.92rem;
+  }
+
+  .mapContainer {
+    aspect-ratio: 4 / 3;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .controlButton {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .legendOverlay {
+    max-width: calc(100% - 1.5rem);
+    overflow: hidden;
+  }
 }

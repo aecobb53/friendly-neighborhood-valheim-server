@@ -46,6 +46,7 @@
   color: #e5e7eb;
   line-height: 1.5;
   font-size: 0.95rem;
+  overflow-wrap: anywhere;
 }
 
 .schedule {
@@ -59,6 +60,7 @@
   margin: 0;
   color: #9ca3af;
   font-size: 0.88rem;
+  overflow-wrap: anywhere;
 }
 
 .quickLinksSection {
@@ -89,6 +91,7 @@
   text-decoration: none;
   background: rgba(255, 255, 255, 0.02);
   font-size: 0.88rem;
+  overflow-wrap: anywhere;
 }
 
 .linkCard:hover {
@@ -147,4 +150,37 @@
 .copiedLabel {
   color: #a7f3d0;
   font-size: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .card {
+    flex-direction: column;
+  }
+
+  .imageWrapper {
+    width: 100%;
+    min-height: 0;
+    height: 180px;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .actionButtons {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .iconButton {
+    min-height: 2rem;
+    padding: 0.35rem 0.6rem;
+  }
 }
