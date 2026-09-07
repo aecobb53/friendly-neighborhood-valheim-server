@@ -211,6 +211,90 @@ function formatTimestamp(timestamp: string | null): string {
   return parsed.toLocaleString();
 }
 
+function normalizeBoolean(value: unknown, defaultValue = false): boolean {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true') {
+      return true;
+    }
+    if (normalized === 'false') {
+      return false;
+    }
+  }
+  return defaultValue;
+}
+
+function normalizePollItem(poll: PollItem): PollItem {
+  return {
+    ...poll,
+    anonymous_responses: normalizeBoolean((poll as PollItem & { anonymous_responses: unknown }).anonymous_responses),
+    allow_vote_changes: normalizeBoolean((poll as PollItem & { allow_vote_changes: unknown }).allow_vote_changes, true),
+  };
+}
+
+function buildResponseBreakdownGroups(poll: PollItem, responses: PollResponseItem[]): Array<{ label: string; entries: string[] }> {
+  const formatUser = (response: PollResponseItem) => response.user_id?.trim() || 'Anonymous';
+
+  if (poll.poll_type === 'single_choice' || poll.poll_type === 'multi_choice' || poll.poll_type === 'ranked_choice') {
+    return poll.options.map((option) => {
+      const entries: string[] = [];
+
+      responses.forEach((response) => {
+        if (poll.poll_type === 'ranked_choice') {
+          response.rankings.forEach((rankedOptionId, index) => {
+            if (rankedOptionId === option.id) {
+              entries.push(`${formatUser(response)} (#${index + 1})`);
+            }
+          });
+          return;
+        }
+
+        if (response.choice_ids.includes(option.id)) {
+          entries.push(formatUser(response));
+        }
+      });
+
+      return {
+        label: option.label,
+        entries,
+      };
+    });
+  }
+
+  if (poll.poll_type === 'rating') {
+    return [1, 2, 3, 4, 5].map((rating) => ({
+      label: `Rating ${rating}`,
+      entries: responses
+        .filter((response) => response.rating === rating)
+        .map((response) => formatUser(response)),
+    }));
+  }
+
+  if (poll.poll_type === 'availability') {
+    const windowMap = new Map<string, string[]>();
+
+    responses.forEach((response) => {
+      const user = formatUser(response);
+      response.availability_windows.forEach((window) => {
+        const label = `${window.day} ${window.start}-${window.end} (${window.kind})`;
+        const entries = windowMap.get(label) ?? [];
+        entries.push(user);
+        windowMap.set(label, entries);
+      });
+    });
+
+    return Array.from(windowMap.entries()).map(([label, entries]) => ({ label, entries }));
+  }
+
+  return responses.map((response) => ({
+    label: formatUser(response),
+    entries: [response.text?.trim() || 'No text provided.'],
+  }));
+}
+
 export default function PollsPage() {
   usePageTitle('Polls');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -231,6 +315,10 @@ export default function PollsPage() {
   const [responseBreakdown, setResponseBreakdown] = useState<PollResponseItem[] | null>(null);
   const [loadingResponseBreakdown, setLoadingResponseBreakdown] = useState(false);
   const [responseBreakdownError, setResponseBreakdownError] = useState<string | null>(null);
+  const [cardBreakdownVisibleByPollId, setCardBreakdownVisibleByPollId] = useState<Record<string, boolean>>({});
+  const [cardBreakdownByPollId, setCardBreakdownByPollId] = useState<Record<string, PollResponseItem[]>>({});
+  const [cardBreakdownLoadingByPollId, setCardBreakdownLoadingByPollId] = useState<Record<string, boolean>>({});
+  const [cardBreakdownErrorByPollId, setCardBreakdownErrorByPollId] = useState<Record<string, string | null>>({});
 
   const requiresOptions = useMemo(
     () => form.poll_type === 'single_choice' || form.poll_type === 'multi_choice' || form.poll_type === 'ranked_choice',
@@ -259,7 +347,7 @@ export default function PollsPage() {
             ? (payload as { data: PollItem[] }).data
             : [];
 
-      setPolls(list);
+      setPolls(list.map(normalizePollItem));
     } else {
       setPolls([]);
       setFeedback(response.error.message);
@@ -391,6 +479,50 @@ export default function PollsPage() {
     setShowResponseBreakdown(true);
   }
 
+  async function toggleCardResponseBreakdown(poll: PollItem) {
+    if (poll.anonymous_responses) {
+      return;
+    }
+
+    const isVisible = Boolean(cardBreakdownVisibleByPollId[poll.id]);
+    if (isVisible) {
+      setCardBreakdownVisibleByPollId((current) => ({
+        ...current,
+        [poll.id]: false,
+      }));
+      return;
+    }
+
+    if (!cardBreakdownByPollId[poll.id]) {
+      setCardBreakdownLoadingByPollId((current) => ({ ...current, [poll.id]: true }));
+      setCardBreakdownErrorByPollId((current) => ({ ...current, [poll.id]: null }));
+
+      const response = await api.get<PollResponseItem[] | { data?: PollResponseItem[]; responses?: PollResponseItem[] }>(`/polls/responses?poll_id=${poll.id}`);
+      if (!response.success) {
+        setCardBreakdownErrorByPollId((current) => ({ ...current, [poll.id]: response.error.message }));
+        setCardBreakdownLoadingByPollId((current) => ({ ...current, [poll.id]: false }));
+        return;
+      }
+
+      const payload = response.data;
+      const list = Array.isArray(payload)
+        ? payload
+        : Array.isArray((payload as { responses?: PollResponseItem[] }).responses)
+          ? (payload as { responses: PollResponseItem[] }).responses
+          : Array.isArray((payload as { data?: PollResponseItem[] }).data)
+            ? (payload as { data: PollResponseItem[] }).data
+            : [];
+
+      setCardBreakdownByPollId((current) => ({ ...current, [poll.id]: list }));
+      setCardBreakdownLoadingByPollId((current) => ({ ...current, [poll.id]: false }));
+    }
+
+    setCardBreakdownVisibleByPollId((current) => ({
+      ...current,
+      [poll.id]: true,
+    }));
+  }
+
   function copyPollLink(pollId: string) {
     const url = `${window.location.origin}/polls?id=${pollId}`;
     navigator.clipboard.writeText(url).then(() => {
@@ -399,73 +531,10 @@ export default function PollsPage() {
     });
   }
 
-  const responseBreakdownGroups = useMemo(() => {
-    if (!selectedPoll || !responseBreakdown) {
-      return [] as Array<{ label: string; entries: string[] }>;
-    }
-
-    const formatUser = (response: PollResponseItem) => response.user_id?.trim() || 'Anonymous';
-
-    if (selectedPoll.poll_type === 'single_choice' || selectedPoll.poll_type === 'multi_choice' || selectedPoll.poll_type === 'ranked_choice') {
-      return selectedPoll.options.map((option) => {
-        const entries: string[] = [];
-
-        responseBreakdown.forEach((response) => {
-          if (selectedPoll.poll_type === 'ranked_choice') {
-            response.rankings.forEach((rankedOptionId, index) => {
-              if (rankedOptionId === option.id) {
-                entries.push(`${formatUser(response)} (#${index + 1})`);
-              }
-            });
-            return;
-          }
-
-          if (response.choice_ids.includes(option.id)) {
-            entries.push(formatUser(response));
-          }
-        });
-
-        return {
-          label: option.label,
-          entries,
-        };
-      });
-    }
-
-    if (selectedPoll.poll_type === 'rating') {
-      return [1, 2, 3, 4, 5].map((rating) => {
-        const entries = responseBreakdown
-          .filter((response) => response.rating === rating)
-          .map((response) => formatUser(response));
-
-        return {
-          label: `Rating ${rating}`,
-          entries,
-        };
-      });
-    }
-
-    if (selectedPoll.poll_type === 'availability') {
-      const windowMap = new Map<string, string[]>();
-
-      responseBreakdown.forEach((response) => {
-        const user = formatUser(response);
-        response.availability_windows.forEach((window) => {
-          const label = `${window.day} ${window.start}-${window.end} (${window.kind})`;
-          const entries = windowMap.get(label) ?? [];
-          entries.push(user);
-          windowMap.set(label, entries);
-        });
-      });
-
-      return Array.from(windowMap.entries()).map(([label, entries]) => ({ label, entries }));
-    }
-
-    return responseBreakdown.map((response) => ({
-      label: formatUser(response),
-      entries: [response.text?.trim() || 'No text provided.'],
-    }));
-  }, [responseBreakdown, selectedPoll]);
+  const responseBreakdownGroups = useMemo(
+    () => (selectedPoll && responseBreakdown ? buildResponseBreakdownGroups(selectedPoll, responseBreakdown) : []),
+    [responseBreakdown, selectedPoll],
+  );
 
   function toggleChoice(optionId: string) {
     if (!selectedPoll) {
@@ -741,6 +810,40 @@ export default function PollsPage() {
                   )}
 
                   <p className={styles.helperText}>{summary.total_responses} total responses</p>
+
+                  {!poll.anonymous_responses && (
+                    <div className={styles.breakdownSection}>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => toggleCardResponseBreakdown(poll)}>
+                        {cardBreakdownVisibleByPollId[poll.id] ? 'Hide Results' : 'Show Results'}
+                      </Button>
+
+                      {cardBreakdownLoadingByPollId[poll.id] && <p className={styles.helperText}>Loading voter breakdown...</p>}
+                      {cardBreakdownErrorByPollId[poll.id] && <p className={styles.breakdownError}>{cardBreakdownErrorByPollId[poll.id]}</p>}
+
+                      {cardBreakdownVisibleByPollId[poll.id] && !cardBreakdownLoadingByPollId[poll.id] && !cardBreakdownErrorByPollId[poll.id] && (
+                        (cardBreakdownByPollId[poll.id]?.length ?? 0) > 0 ? (
+                          <div className={styles.breakdownList}>
+                            {buildResponseBreakdownGroups(poll, cardBreakdownByPollId[poll.id]).map((group) => (
+                              <div key={group.label} className={styles.breakdownGroup}>
+                                <p className={styles.breakdownLabel}>{group.label}</p>
+                                {group.entries.length > 0 ? (
+                                  <ul className={styles.breakdownEntries}>
+                                    {group.entries.map((entry, index) => (
+                                      <li key={`${entry}-${index}`}>{entry}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className={styles.helperText}>No responses for this result yet.</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className={styles.helperText}>No detailed responses available yet.</p>
+                        )
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {poll.options.length > 0 && (
@@ -970,8 +1073,8 @@ export default function PollsPage() {
                             <p className={styles.breakdownLabel}>{group.label}</p>
                             {group.entries.length > 0 ? (
                               <ul className={styles.breakdownEntries}>
-                                {group.entries.map((entry) => (
-                                  <li key={entry}>{entry}</li>
+                                {group.entries.map((entry, index) => (
+                                  <li key={`${entry}-${index}`}>{entry}</li>
                                 ))}
                               </ul>
                             ) : (

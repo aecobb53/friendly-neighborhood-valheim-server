@@ -14,7 +14,7 @@ export default function TrustedExternalLink({ href, children, className = '', on
 
   if (!verdict.clickable) {
     return (
-      <span className={styles.wrap}>
+      <span className={styles.inlineWrap}>
         <span>{children}</span>
         <span className={styles.badge}>Not trusted</span>
       </span>
@@ -27,11 +27,9 @@ export default function TrustedExternalLink({ href, children, className = '', on
   ].filter(Boolean).join(' ');
 
   return (
-    <span className={styles.wrap}>
-      <a href={href} className={classes} rel="noreferrer noopener" target="_blank" onClick={onClick}>
-        {children}
-      </a>
+    <a href={href} className={classes} rel="noreferrer noopener" target="_blank" onClick={onClick}>
+      {children}
       {!verdict.trusted && <span className={styles.badge}>Not trusted</span>}
-    </span>
+    </a>
   );
 }
